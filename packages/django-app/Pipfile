@@ -9,6 +9,7 @@ django-extensions = "==3.2.3"
 psycopg2-binary = "==2.9.7"
 stringcase = "==1.2.0"
 plexapi = "==4.15.1"
+"discord.py" = "*"
 
 [dev-packages]
 pytest = "==7.4.2"
