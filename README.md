@@ -24,7 +24,7 @@
     * `$ ./utils/reload-docker-db.sh --data=dev_data.json`
 
 * `$ docker-compose up web`
-* you can now login with your superuser at 0.0.0.0:8000/admin
+* you can now log in with your superuser at 0.0.0.0:8000/admin
 
 ## helpful scripts
 * `$ ./utils/dcp-run-tests.sh`
