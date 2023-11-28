@@ -23,3 +23,10 @@ class PlexMovieAdmin(admin.ModelAdmin):
     )
     list_filter = ('created_at', 'modified_at', 'deleted_at', 'is_active')
     date_hierarchy = 'created_at'
+    search_fields = (
+        'title',
+        'actors',
+        'directors',
+        'producers',
+        'writers',
+    )
