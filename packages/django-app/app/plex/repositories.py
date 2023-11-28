@@ -14,6 +14,11 @@ class PlexMovieRepository(BaseRepository):
         return plex_movie
 
     @classmethod
+    def get_random(cls):
+        plex_movie = cls.model.objects.order_by('?').first()
+        return plex_movie
+
+    @classmethod
     @sync_to_async
     def get_by_title_async(cls, title):
         return cls.get_by_title(title)
