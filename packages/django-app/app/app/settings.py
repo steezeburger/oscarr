@@ -50,9 +50,11 @@ INSTALLED_APPS = [
 
     # contrib
     'django_extensions',
+    'pgcrypto',
 
     # own
     'core',
+    'plex',
 ]
 
 MIDDLEWARE = [
@@ -153,3 +155,11 @@ SITE_URL = os.environ.get('SITE_URL', '0.0.0.0')
 
 # Discord
 DISCORD_TOKEN = os.environ['DISCORD_TOKEN']
+
+# pgcrypto
+PGCRYPTO_KEY = os.environ['PGCRYPTO_KEY']
+
+# plex
+PLEX_USERNAME = os.environ.get('PLEX_USERNAME')
+PLEX_PASSWORD = os.environ.get('PLEX_PASSWORD')
+PLEX_SERVER_NAME = os.environ.get('PLEX_SERVER_NAME')

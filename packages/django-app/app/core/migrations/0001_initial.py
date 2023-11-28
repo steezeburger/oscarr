@@ -24,7 +24,7 @@ class Migration(migrations.Migration):
                 ('modified_at', models.DateTimeField(auto_now=True, db_index=True)),
                 ('deleted_at', models.DateTimeField(db_index=True, null=True)),
                 ('is_active', models.BooleanField(db_index=True, default=True, help_text='Designates whether this object should be treated as active. Unselect this instead of deleting objects.', verbose_name='active')),
-                ('email', models.EmailField(max_length=255, unique=True, verbose_name='email')),
+                ('nickname', models.CharField(db_index=True, max_length=100, unique=True)),
                 ('is_staff', models.BooleanField(default=False, help_text='Designates whether the user can log into this admin site.', verbose_name='staff status')),
                 ('groups', models.ManyToManyField(blank=True, help_text='The groups this user belongs to. A user will get all permissions granted to each of their groups.', related_name='user_set', related_query_name='user', to='auth.Group', verbose_name='groups')),
                 ('user_permissions', models.ManyToManyField(blank=True, help_text='Specific permissions for this user.', related_name='user_set', related_query_name='user', to='auth.Permission', verbose_name='user permissions')),

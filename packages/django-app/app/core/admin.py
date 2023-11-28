@@ -34,7 +34,7 @@ class UserCreationForm(forms.ModelForm):
 
     class Meta:
         model = User
-        fields = ("email",)
+        fields = ("nickname",)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -92,7 +92,7 @@ class UserAdmin(DjangoUserAdmin):
         (None, {
             'classes': ('wide',),
             'fields': (
-                'email',
+                'nickname',
                 'password1',
                 'password2',
                 'is_superuser',
@@ -102,7 +102,7 @@ class UserAdmin(DjangoUserAdmin):
         }),)
 
     fieldsets = (
-        (None, {'fields': ('email',
+        (None, {'fields': ('nickname',
                            'password',)}),
 
         ('Permissions', {'fields': ('is_staff',
@@ -122,10 +122,10 @@ class UserAdmin(DjangoUserAdmin):
         'is_active',
         'is_staff',
         'is_superuser',
-        'email',
+        'nickname',
     ]
 
-    list_display_links = ['id', 'email']
+    list_display_links = ['id', 'nickname']
 
     list_filter = [
         'is_staff',
@@ -138,5 +138,5 @@ class UserAdmin(DjangoUserAdmin):
     readonly_fields = ['created_at', 'deleted_at', 'modified_at']
 
     search_fields = (
-        'email',
+        'nickname',
     )

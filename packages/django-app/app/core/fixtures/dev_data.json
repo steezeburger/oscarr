@@ -42,6 +42,13 @@
     }
 },
 {
+    "model": "contenttypes.contenttype",
+    "fields": {
+        "app_label": "plex",
+        "model": "plexmovie"
+    }
+},
+{
     "model": "auth.permission",
     "fields": {
         "name": "Can add log entry",
@@ -264,15 +271,17 @@
 {
     "model": "core.user",
     "fields": {
-        "password": "pbkdf2_sha256$320000$0Qwlf7cl4AOYvOu8cWne6p$JW9Nhv9/bZkxJv5jUNLMwYAZmwgf6lU25/hmdEEuDtI=",
-        "last_login": "2021-12-10T05:52:39.842Z",
+        "password": "pbkdf2_sha256$600000$y1osYkEsoRIXDt0iDEbeDu$GzMsCJP1XC/mbXq5P5/Um8nAZkz3Mx8F91YX5/m73z4=",
+        "last_login": "2023-11-28T02:22:26.477Z",
         "is_superuser": true,
-        "created_at": "2021-12-10T05:51:01.230Z",
-        "modified_at": "2021-12-10T05:51:01.230Z",
+        "created_at": "2023-11-28T02:22:23.753Z",
+        "modified_at": "2023-11-28T02:22:23.753Z",
         "deleted_at": null,
         "is_active": true,
-        "email": "admin@email.com",
+        "nickname": "admin",
         "is_staff": true,
+        "discord_username": null,
+        "discord_id": null,
         "groups": [],
         "user_permissions": []
     }

@@ -1,7 +1,5 @@
 from django.contrib.auth.base_user import BaseUserManager
 
-from core.helpers import generate_signup_key
-
 
 class UserManager(BaseUserManager):
     """
@@ -9,22 +7,21 @@ class UserManager(BaseUserManager):
     """
     use_in_migrations = True
 
-    def _create_user(self, email, password, **extra_fields):
-        # email = self.normalize_email(email)
-        if not email:
-            raise ValueError('The email must be set')
-        user = self.model(email=email, **extra_fields)
+    def _create_user(self, nickname, password, **extra_fields):
+        if not nickname:
+            raise ValueError('The nickname must be set')
+        user = self.model(nickname=nickname, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
         return user
 
-    def create_user(self, email, password=None, **extra_fields):
+    def create_user(self, nickname, password=None, **extra_fields):
         """
         Creates and saves a :class:`User<core.models.User>`
-        with the given email and password.
+        with the given nickname and password.
 
-        :param email: :class:`python:str` or :func:`python:unicode`
-            Email
+        :param nickname: :class:`python:str` or :func:`python:unicode`
+            Nickname
         :param password: :class:`python:str` or :func:`python:unicode`
             Password
         :param extra_fields: :class:`python:dict`
@@ -34,14 +31,14 @@ class UserManager(BaseUserManager):
         :rtype: :class:`core.models.User`
         """
         extra_fields.setdefault('is_superuser', False)
-        return self._create_user(email, password, **extra_fields)
+        return self._create_user(nickname, password, **extra_fields)
 
-    def create_superuser(self, email, password, **extra_fields):
+    def create_superuser(self, nickname, password, **extra_fields):
         """
         Creates and saves a :class:`User<core.models.User>`
-        with the given email, password and superuser privileges.
+        with the given nickname, password and superuser privileges.
 
-        :param email: :class:`python:str`
+        :param nickname: :class:`python:str`
             Nickname
         :param password: :class:`python:str`
             Password
@@ -55,4 +52,4 @@ class UserManager(BaseUserManager):
         extra_fields.setdefault('is_active', True)
         extra_fields.setdefault('is_staff', True)
 
-        return self._create_user(email, password, **extra_fields)
+        return self._create_user(nickname, password, **extra_fields)

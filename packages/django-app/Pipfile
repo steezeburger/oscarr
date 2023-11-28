@@ -10,11 +10,18 @@ psycopg2-binary = "==2.9.7"
 stringcase = "==1.2.0"
 plexapi = "==4.15.1"
 "discord.py" = "*"
+django-pgcrypto-fields = "*"
 
 [dev-packages]
 pytest = "==7.4.2"
-pytest-cov = "==4.1.0"
-pytest-django = "==4.5.2"
+pytest-cov = "*"
+pytest-django = "*"
+pytest-xdist = "*"
+autopep8 = "*"
+factory-boy = "*"
+pylint = "*"
+pylint-django = "*"
+flake8 = "*"
 
 [requires]
 python_version = "3.11.4"

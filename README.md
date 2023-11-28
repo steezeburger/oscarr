@@ -1,5 +1,7 @@
 # Django w/ Postgres starter
 
+> NOTE - this is out of date, and needs to be updated to use pipenv
+
 * git clone the repo to your machine
 * find and replace instances of `yourproject` with the name of your project
 * `$ cd packages/django-app`
@@ -20,7 +22,7 @@
 * now, you have two options
   * create your own superuser
     * `$ ./bin/dcp-django-admin.sh createsuperuser`
-  * load db w/ user admin@email:password
+  * load db w/ user admin:password
     * `$ ./utils/reload-docker-db.sh --data=dev_data.json`
 
 * `$ docker-compose up web`
