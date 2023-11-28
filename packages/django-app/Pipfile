@@ -11,6 +11,9 @@ stringcase = "==1.2.0"
 plexapi = "==4.15.1"
 "discord.py" = "*"
 django-pgcrypto-fields = "*"
+pandas = "*"
+networkx = "*"
+matplotlib = "*"
 
 [dev-packages]
 pytest = "==7.4.2"
