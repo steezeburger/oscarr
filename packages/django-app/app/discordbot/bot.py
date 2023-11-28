@@ -5,6 +5,7 @@ from aiohttp import ClientSession
 from discord import app_commands
 
 from discordbot.bacon import bacon
+from discordbot.search import search
 
 
 class OscarrBot(discord.Client):
@@ -38,4 +39,5 @@ class OscarrBot(discord.Client):
     async def setup_hook(self) -> None:
         print('setup hook')
         self.tree.add_command(bacon)
+        self.tree.add_command(search)
         await self.tree.sync()
