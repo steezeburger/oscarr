@@ -29,7 +29,7 @@ update-oscarr:
   docker-compose build web
   ./bin/dcp-django-admin.sh migrate
   docker-compose stop web
-  docker-compose up -f docker-compose.yml -f docker-compose.prod.yml -d web
+  docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d web
 
 # create volumes, build images
 init-dcp:
