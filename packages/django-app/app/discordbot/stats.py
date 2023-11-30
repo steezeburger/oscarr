@@ -1,3 +1,4 @@
+import logging
 import os
 
 import discord
@@ -8,6 +9,7 @@ from matplotlib import pyplot
 
 from plex.models import PlexMovie
 
+logger = logging.getLogger(__name__)
 
 @app_commands.command(name="genre_pie", description="Generate a pie chart of the movie genres.")
 async def genre_pie(interaction: discord.Interaction):
@@ -43,5 +45,5 @@ async def genre_pie(interaction: discord.Interaction):
         # Remove the image file
         os.remove('genre_pie_chart.png')
     except Exception as e:
-        print(e)
+        logger.warning(f"Error generating genre pie chart: {e}")
         await interaction.response.send_message(f"Error: {e}")

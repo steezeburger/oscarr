@@ -183,3 +183,16 @@ PGCRYPTO_KEY = os.environ['PGCRYPTO_KEY']
 PLEX_USERNAME = os.environ.get('PLEX_USERNAME')
 PLEX_PASSWORD = os.environ.get('PLEX_PASSWORD')
 PLEX_SERVER_NAME = os.environ.get('PLEX_SERVER_NAME')
+
+# radarr
+RADARR_API_URL = os.environ.get('RADARR_API_URL')
+RADARR_API_KEY = os.environ.get('RADARR_API_KEY')
+RADARR_ROOT_FOLDER_PATH = os.environ.get('RADARR_ROOT_FOLDER_PATH')
+RADARR_QUALITY_PROFILE_ID = os.environ.get('RADARR_QUALITY_PROFILE_ID')
+
+# seedbox
+SEEDBOX_UN = os.environ.get('SEEDBOX_UN')
+SEEDBOX_PW = os.environ.get('SEEDBOX_PW')
+
+# tmdb
+TMDB_TOKEN_V3 = os.environ.get('TMDB_TOKEN_V3')

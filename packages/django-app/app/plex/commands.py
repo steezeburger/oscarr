@@ -55,7 +55,7 @@ class SyncWithPlexCommand(AbstractBaseCommand):
 
                 plex_movie.created_at = added_at
                 plex_movie.save()
-                logger.info(f'Created PlexMovie: {plex_movie}')
+                print(f'Created PlexMovie: {plex_movie}')
             except Exception as e:
                 logger.exception(f"Failed to create PlexMovie: {movie}")
                 logger.exception(e)
