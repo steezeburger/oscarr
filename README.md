@@ -34,6 +34,9 @@ just dcp-up-all
 # open up admin app and login as superuser you just created
 # for mac os
 open http://0.0.0.0:8000/admin
+
+# start bot in detached container
+just dcp-start-bot
 ```
 
 ## helpful scripts

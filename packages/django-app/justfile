@@ -5,6 +5,10 @@ default:
 sync-with-plex:
   ./bin/dcp-django-admin.sh sync_with_plex
 
+# starts the discord bot in a container
+start-discord-bot:
+  docker-compose run -d --rm -w /code/app web /code/app/manage.py start_discord_bot
+
 # create python venv and install dependencies
 setup-local-python-venv:
   python3 -m venv .venv
