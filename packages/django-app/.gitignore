@@ -3,9 +3,11 @@
 
 # logs from the application
 logs/
+backups/
 
-# local fixtures
+# local fixtures and dumps
 **/fixtures/local/
+*.pgdump
 
 # media files location
 app/media/

@@ -16,8 +16,9 @@ RUN pipenv install --dev --deploy --system
 # install application into container
 COPY . /code
 
-# make directory for our logs
+# make directories for our logs and backups
 RUN mkdir -p /logs
+RUN mkdir -p /backups
 
 # run application
 EXPOSE 8000

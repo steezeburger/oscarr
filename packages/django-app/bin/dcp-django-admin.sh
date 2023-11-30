@@ -16,8 +16,6 @@ function checkenv() {
   then
     echo "You are running this command against the database at ${DB_HOST}!"
     checkconfidence
-  else
-    echo "Running command against database at $DB_HOST..."
   fi
 }
 

@@ -11,13 +11,20 @@ setup-local-python-venv:
   source .venv/bin/activate
   PIPENV_VENV_IN_PROJECT=1 pipenv install --dev --deploy
 
-# TODO
-create-db-backup:
-  echo "TODO!"
+default_backups_location := "/backups"
+# create backup with pgdump. must set some envars
+create-pgdump location=default_backups_location:
+  docker-compose exec db pg_dump -U $POSTGRES_USER $POSTGRES_DB > {{location}}/`date +%Y-%m-%d_%H-%M-%S`-oscarrdump.sql
+# creates a json backup of the db
+create-json-backup location=default_backups_location:
+  just dcp-dumpdata > {{location}}/`date +%Y-%m-%d_%H-%M-%S`-oscarrdump.json
 
-# TODO - git pull, migrate, restart?
+# pulls latest code, builds web image, migrates db, restarts web container
 update-oscarr:
-  echo "TODO!"
+  git pull origin main
+  docker-compose build web
+  ./bin/dcp-django-admin.sh migrate
+  docker-compose restart web
 
 # create volumes, build images
 init-dcp:
