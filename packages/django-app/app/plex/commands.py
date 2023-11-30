@@ -7,12 +7,17 @@ from plexapi.myplex import MyPlexAccount
 from common.commands.abstract_base_command import AbstractBaseCommand
 from plex.repositories import PlexMovieRepository
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 
 class SyncWithPlexCommand(AbstractBaseCommand):
     """
     Sync Oscarr's database with the movies on the Plex.
+    Stops syncing when we get to a movie that was added
+    before the latest movie in the database.
+
+    Unfortunately the Plex API doesn't allow us to filter
+    by addedAt, so we have to get a page of movies.
     """
 
     def execute(self) -> None:
@@ -27,7 +32,7 @@ class SyncWithPlexCommand(AbstractBaseCommand):
 
         for movie in movies.all(sort='addedAt:desc',
                                 container_start=0,
-                                container_size=100):
+                                container_size=5):
             added_at = movie.addedAt.replace(tzinfo=timezone.utc)
             if latest_movie and added_at <= latest_movie.created_at:
                 # break out of loop if we start to get a movie
@@ -50,7 +55,7 @@ class SyncWithPlexCommand(AbstractBaseCommand):
 
                 plex_movie.created_at = added_at
                 plex_movie.save()
-                print(f'Created PlexMovie: {plex_movie}')
+                logger.info(f'Created PlexMovie: {plex_movie}')
             except Exception as e:
                 logger.exception(f"Failed to create PlexMovie: {movie}")
                 logger.exception(e)
