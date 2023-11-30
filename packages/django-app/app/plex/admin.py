@@ -1,4 +1,4 @@
-from django.contrib import admin
+from django.contrib import admin, messages
 
 from .models import PlexMovie
 
@@ -30,3 +30,13 @@ class PlexMovieAdmin(admin.ModelAdmin):
         'producers',
         'writers',
     )
+
+    actions = ['force_delete_plex_movie']
+
+    @admin.action(description='!!! FORCE DELETE PLEX MOVIE !!!')
+    def force_delete_plex_movie(self, request, queryset):
+        queryset.delete(force_delete=True)
+        self.message_user(
+            request,
+            "Force Deleted Plex Movies!",
+            messages.SUCCESS)
