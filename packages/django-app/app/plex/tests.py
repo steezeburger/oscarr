@@ -43,3 +43,13 @@ class TestPlexMovieRepository(TestCase):
             plex_movie.title.lower())
 
         self.assertEqual(plex_movie.title, obj_from_db.title)
+
+
+class TestPlexCommands(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = UserFactory()
+
+    def test_should_sync_plex_movies(self):
+        # TODO
+        pass
