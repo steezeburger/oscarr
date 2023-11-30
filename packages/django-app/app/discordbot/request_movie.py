@@ -79,7 +79,7 @@ def create_buttons(data) -> List[discord.ui.Button]:
         tmdb_id = item.get('id', None)
         if tmdb_id:
             button = discord.ui.Button(
-                label=f"Request {item['title']}!",
+                label=f"Request {item['title']}",
                 style=discord.ButtonStyle.primary,
                 custom_id=f"tmdb_{tmdb_id}")
             buttons.append(button)
