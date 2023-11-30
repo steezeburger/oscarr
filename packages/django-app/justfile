@@ -24,11 +24,12 @@ create-json-backup location=default_backups_location:
   just dcp-dumpdata > {{location}}/`date +%Y-%m-%d_%H-%M-%S`-oscarrdump.json
 
 # pulls latest code, builds web image, migrates db, restarts web container
-update-oscarr:
+update-oscarr volume_mount:
   git pull origin main
   docker-compose build web
   ./bin/dcp-django-admin.sh migrate
-  docker-compose restart web
+  docker-compose stop web
+  docker-compose up -d --volume {{volume_mount}} web
 
 # create volumes, build images
 init-dcp:
