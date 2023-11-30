@@ -85,6 +85,7 @@ TEMPLATES = [
     },
 ]
 
+LOGS_DIR = os.environ.get('LOGS_DIR', '/logs')
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -92,7 +93,7 @@ LOGGING = {
         "file": {
             "level": "INFO",
             "class": "logging.FileHandler",
-            "filename": "/logs/oscarr-debug.log",
+            "filename": os.path.join(LOGS_DIR, "oscarr.log"),
         },
     },
     "loggers": {
