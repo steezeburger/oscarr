@@ -77,6 +77,10 @@ dcp-dumpdata:
   --exclude=sessions.session \
   --indent 4
 
+# loads dev data into db
+dcp-load-dev-data:
+  ./bin/dcp-django-admin.sh loaddata dev_data.json
+
 # run tests, excluding integration tests
 dcp-run-tests:
   docker-compose run --rm -w /code/app web \

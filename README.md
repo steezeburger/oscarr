@@ -25,6 +25,8 @@ just dcp-migrate
 
 # create superuser
 just create-superuser
+# OR can load fixture data and login with admin:password
+just dcp-load-dev-data
 
 # bring up web container
 just dcp-up-all
