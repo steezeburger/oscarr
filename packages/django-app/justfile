@@ -11,7 +11,7 @@ setup-local-python-venv:
   source .venv/bin/activate
   PIPENV_VENV_IN_PROJECT=1 pipenv install --dev --deploy
 
-default_backups_location := "/backups"
+default_backups_location := "./backups"
 # create backup with pgdump. must set some envars
 create-pgdump location=default_backups_location:
   docker-compose exec db pg_dump -U $POSTGRES_USER $POSTGRES_DB > {{location}}/`date +%Y-%m-%d_%H-%M-%S`-oscarrdump.sql
