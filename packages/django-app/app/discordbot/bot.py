@@ -6,7 +6,7 @@ from discord import app_commands
 
 from discordbot.bacon import bacon
 from discordbot.get_random import get_random
-from discordbot.request_movie import request_movie
+from discordbot.request_movie import request_movie, search_tmdb
 from discordbot.search import search
 from discordbot.stats import genre_pie
 
@@ -45,5 +45,6 @@ class OscarrBot(discord.Client):
         self.tree.add_command(genre_pie)
         self.tree.add_command(get_random)
         self.tree.add_command(request_movie)
+        self.tree.add_command(search_tmdb)
         self.tree.add_command(search)
         await self.tree.sync()

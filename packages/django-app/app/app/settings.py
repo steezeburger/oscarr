@@ -121,7 +121,6 @@ DATABASES = {
     }
 }
 
-
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
 
@@ -140,7 +139,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/4.0/topics/i18n/
 
@@ -151,7 +149,6 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
@@ -190,9 +187,19 @@ RADARR_API_KEY = os.environ.get('RADARR_API_KEY')
 RADARR_ROOT_FOLDER_PATH = os.environ.get('RADARR_ROOT_FOLDER_PATH')
 RADARR_QUALITY_PROFILE_ID = os.environ.get('RADARR_QUALITY_PROFILE_ID')
 
+OMBI_API_URL = os.environ.get('OMBI_API_URL')
+OMBI_API_KEY = os.environ.get('OMBI_API_KEY')
+
 # seedbox
 SEEDBOX_UN = os.environ.get('SEEDBOX_UN')
 SEEDBOX_PW = os.environ.get('SEEDBOX_PW')
 
 # tmdb
 TMDB_TOKEN_V3 = os.environ.get('TMDB_TOKEN_V3')
+
+OMBI_UID_MAP = {
+    "admin": os.environ.get('OMBI_ADMIN_UID'),
+    os.environ.get('OMBI_B_UN'): os.environ.get('OMBI_B_UID'),
+    os.environ.get('OMBI_S_UN'): os.environ.get('OMBI_S_UID'),
+    os.environ.get('OMBI_Y_UN'): os.environ.get('OMBI_Y_UID'),
+}

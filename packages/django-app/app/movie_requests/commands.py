@@ -1,8 +1,10 @@
 import stringcase
+from django.conf import settings
 from django.forms import fields
 
 from common.commands.abstract_base_command import AbstractBaseCommand
 from common.forms.base_form import BaseForm
+from services.ombi import Ombi
 from services.radarr import Radarr
 from services.tmdb import TMDB
 
@@ -28,11 +30,12 @@ def get_radarr_request_from_tmdb_info(tmdb_info: dict) -> dict:
 
 class RequestMovieForm(BaseForm):
     tmdb_id = fields.IntegerField()
+    discord_username = fields.CharField(required=False)
 
 
-class RequestMovieCommand(AbstractBaseCommand):
+class RequestRadarrMovieCommand(AbstractBaseCommand):
     """
-    Command for requesting a movie.
+    Command for requesting a movie on Radarr.
     """
 
     def __init__(self, form: 'RequestMovieForm'):
@@ -62,7 +65,6 @@ class RequestMovieCommand(AbstractBaseCommand):
                 f"Try requesting just the individual movie.")
             return False, message
 
-        # TODO - replace with ombi
         try:
             # creates the movie in Radarr
             radarr_request = get_radarr_request_from_tmdb_info(movie_info)
@@ -71,3 +73,54 @@ class RequestMovieCommand(AbstractBaseCommand):
             return False, f"Failed to create movie on Radarr: {str(e)}"
 
         return True, f"Request created!"
+
+
+def get_ombi_request_from_tmdb_info(tmdb_info: dict, username: str) -> dict:
+    print(f"ombi uid map: {settings.OMBI_UID_MAP}")
+    uid = settings.OMBI_UID_MAP.get("admin")
+    if username in settings.OMBI_UID_MAP:
+        uid = settings.OMBI_UID_MAP.get(username)
+    return {
+        "theMovieDbId": tmdb_info.get('id'),
+        "languageCode": "en",
+        "is4kRequest": False,
+        "requestOnBehalf": uid,
+        "rootFolderOverride": None,
+        "qualityPathOverride": None
+    }
+
+
+class RequestOmbiMovieCommand(AbstractBaseCommand):
+    """
+    Command for requesting a movie on Ombi.
+    """
+
+    def __init__(self, form: 'RequestMovieForm'):
+        self.form = form
+
+    async def execute(self) -> (bool, str):
+        super().execute()
+
+        tmdb_id = self.form.cleaned_data['tmdb_id']
+        existing_request = Radarr.get_movie(tmdb_id=tmdb_id)
+
+        print(f"existing radarr movie: {existing_request}")
+
+        if existing_request and existing_request['sizeOnDisk'] > 0:
+            return False, f"This request has already been fulfilled. {existing_request['title']} is on the server!"
+        if existing_request and existing_request['sizeOnDisk'] == 0:
+            message = (
+                f"{existing_request['title']} has already been requested.\r\n"
+                f"Reach out to the server administrator if you think there is an issue.")
+            return False, message
+
+        movie_info = TMDB.get_movie_by_id(tmdb_id)
+        print(f"movie info: {movie_info}")
+
+        try:
+            # creates the movie in ombi
+            ombi_request = get_ombi_request_from_tmdb_info(movie_info, self.form.cleaned_data['discord_username'])
+            Ombi.create_request(ombi_request)
+            return True, f"Request created! \n https://www.themoviedb.org/movie/{movie_info.get('id')}"
+        except Exception as e:
+            return False, f"Failed to create movie on Ombi: {str(e)}"

@@ -16,5 +16,12 @@ class TMDB:
         return response
 
     @classmethod
+    def search_by_title(cls, title: str):
+        search = tmdb.Search()
+        response = search.movie(query=title)
+        print(response)
+        return response
+
+    @classmethod
     def get_poster_full_path(cls, poster_path) -> str:
         return f'{cls.poster_base_url}{poster_path}'
