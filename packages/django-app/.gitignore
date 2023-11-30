@@ -15,3 +15,5 @@ app/media/
 # static files location
 app/static/
 
+# prod
+docker-compose.prod.yml
