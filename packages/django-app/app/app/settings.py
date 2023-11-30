@@ -89,11 +89,17 @@ LOGS_DIR = os.environ.get('LOGS_DIR', '/logs')
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
+    "formatters": {
+        "moreinfo": {
+            "format": "%(levelname)s %(asctime)s %(name)s.%(funcName)s:%(lineno)s- %(message)s"
+        },
+    },
     "handlers": {
         "file": {
             "level": "INFO",
             "class": "logging.FileHandler",
             "filename": os.path.join(LOGS_DIR, "oscarr.log"),
+            "formatter": "moreinfo",
         },
     },
     "loggers": {
