@@ -1,4 +1,5 @@
 import logging
+from typing import List
 
 import discord
 from discord import app_commands
@@ -72,10 +73,36 @@ def create_discord_embed(item):
     return embed
 
 
+def create_buttons(data) -> List[discord.ui.Button]:
+    buttons = []
+    for item in data['results'][:3]:
+        tmdb_id = item.get('id', None)
+        if tmdb_id:
+            button = discord.ui.Button(
+                label=f"Request {item['title']}!",
+                style=discord.ButtonStyle.primary,
+                custom_id=f"tmdb_{tmdb_id}")
+            buttons.append(button)
+    return buttons
+
+
 @app_commands.command(name="search_tmdb", description="Search TMDB for a movie.")
 async def search_tmdb(interaction: discord.Interaction, title: str):
     print("searching tmdb via discord bot")
     results = TMDB.search_by_title(title)
 
     embeds = [create_discord_embed(item) for item in results['results'][:3]]
-    await interaction.response.send_message(embeds=embeds)
+    buttons = create_buttons(results)
+
+    view = discord.ui.View()
+    for button in buttons:
+        view.add_item(button)
+
+    try:
+        await interaction.response.send_message(
+            embeds=embeds,
+            view=view)
+    except Exception as e:
+        print(e)
+
+    return
