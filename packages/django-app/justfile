@@ -1,0 +1,89 @@
+default:
+  @just --list
+
+# calls sync_with_plex django management command in the container
+sync-with-plex:
+  ./bin/dcp-django-admin.sh sync_with_plex
+
+# create python venv and install dependencies
+setup-local-python-venv:
+  python3 -m venv .venv
+  source .venv/bin/activate
+  PIPENV_VENV_IN_PROJECT=1 pipenv install --dev --deploy
+
+# TODO
+create-db-backup:
+  echo "TODO!"
+
+# TODO - git pull, migrate, restart?
+update-oscarr:
+  echo "TODO!"
+
+# create volumes, build images
+init-dcp:
+  docker volume create --name=oscarr_postgres
+  docker-compose build
+  docker-compose up -d db
+  ./bin/wait-for-it.sh localhost:5432 -- echo "db is up"
+
+# create django admin superuser
+create-superuser:
+  ./bin/dcp-django-admin.sh createsuperuser
+
+# generate a secret key for pg crypto library
+generate-pg-secret-key:
+  # generate random 32 digit lowercase string
+  openssl rand -hex 16
+
+# cleanup all dcp stuff
+dcp-cleanup:
+  docker-compose stop
+  docker-compose rm -f db web
+  docker volume rm oscarr_postgres
+
+# creates docker volume for postgres data
+d-create-volumes:
+  docker volume create --name=oscarr_postgres
+
+# build web image
+dcp-build-web:
+  docker-compose build web
+
+# build db image
+dcp-build-db:
+  docker-compose build db
+
+# build web and db images
+dcp-build-images: dcp-build-web dcp-build-db
+
+# run web and db containers
+dcp-up-all:
+  docker-compose up -d
+
+# stop web and db containers
+dcp-stop-all:
+  docker-compose stop
+
+# migrate db
+dcp-migrate:
+  ./bin/dcp-django-admin.sh migrate
+
+# dump data from the db container
+dcp-dumpdata:
+  ./bin/dcp-django-admin.sh dumpdata \
+  --natural-primary \
+  --natural-foreign \
+  --exclude=admin.logentry \
+  --exclude=sessions.session \
+  --indent 4
+
+# run tests, excluding integration tests
+dcp-run-tests:
+  docker-compose run --rm -w /code/app web \
+    pytest -m "not integration" --cov=. --verbose
+
+# generate a secret key for django and crypto stuff
+dcp-generate-secret-key:
+  docker-compose run --rm -w /code/app web \
+    python -c \
+    'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())'

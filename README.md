@@ -1,49 +1,44 @@
-# Django w/ Postgres starter
+# Oscarr
 
-> NOTE - this is out of date, and needs to be updated to use pipenv
+* dependencies
+  * docker
+  * just - https://github.com/casey/just
+    * `brew install just` for mac os
 
-* git clone the repo to your machine
-* find and replace instances of `yourproject` with the name of your project
-* `$ cd packages/django-app`
-* `python -m venv .venv`
-  * not technically necessary, but useful for installing locally to add pip packages and update the requirements.txt file
-  * `$ source .venv/bin/activate`
-  * `$ pip install -r requirements.txt`
-  * `$ pip install some_package`
-  * `$ pip freeze > requirements.txt`
-  * OR `PIPENV_VENV_IN_PROJECT=1 pipenv install --dev --deploy`
-* `$ cp .env.template .env`
-* `$ docker-compose build`
-* `$ ./utils/create-docker-volumes.sh`
-* `$ ./bin/dcp-generate-secret-key.sh`
-  * copy and paste the output from this command into `.env` replacing `SECRET_KEY_GOES_HERE`
-* `$ ./bin/dcp-django-admin.sh migrate`
+## Docker Compose
+```sh
+cd packages/django-app
 
-* now, you have two options
-  * create your own superuser
-    * `$ ./bin/dcp-django-admin.sh createsuperuser`
-  * load db w/ user admin:password
-    * `$ ./utils/reload-docker-db.sh --data=dev_data.json`
+# you will need to populate env.
+# see an example in `.env.template`
+touch .env
 
-* `$ docker-compose up web`
-* you can now log in with your superuser at 0.0.0.0:8000/admin
+# init volumes and images. bring up db container.
+just init-dcp
+
+# generate secret keys and add to .env
+just dcp-generate-secret-key
+just generate-pg-secret-key
+
+# can now migrate database
+just dcp-migrate
+
+# create superuser
+just create-superuser
+
+# bring up web container
+just dcp-up-all
+
+# open up admin app (works for macos)
+open http://0.0.0.0:8000/admin
+```
 
 ## helpful scripts
-* `$ ./utils/dcp-run-tests.sh`
-  * runs all tests, except those decorated with `@pytest.mark.integration`
-  * tests.py test_*.py *_test.py *_tests.py
-* `$ ./bin/dcp-django-admin.sh`
+* `./bin/dcp-django-admin.sh`
   * runs `manage.py` in the docker container with argument passthrough
-  * `$ ./bin/dcp-django-admin.sh makemigrations`
-  * `$ ./bin/dcp-django-admin.sh migrate`
-  * `$ ./bin/dcp-django-admin.sh startapp payments`
-* `$ ./utils/reload-docker-db.sh`
+  * `./bin/dcp-django-admin.sh makemigrations`
+  * `./bin/dcp-django-admin.sh migrate`
+  * `./bin/dcp-django-admin.sh startapp payments`
+* `./utils/reload-docker-db.sh` - BROKEN?
   * reloads `dev_data.json` by default
-  * `$ ./utils/reload-docker-db.sh --data=fixture_filename.json`
-* `$ ./utils/dump-data.sh`
-  *  `$ ./utils/dump-data.sh > app/core/fixtures/dump-2021-10-08.json`
-  * you can then reload these files with `./utils/reload-docker-db.sh`
-
-
-### TODOs
-* graphql api layer
+  * `./utils/reload-docker-db.sh --data=fixture_filename.json`

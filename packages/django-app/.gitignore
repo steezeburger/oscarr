@@ -1,8 +1,15 @@
 # data for management commands
 **/management/commands/data/
 
+# logs from the application
+logs/
+
+# local fixtures
+**/fixtures/local/
+
 # media files location
 app/media/
 
 # static files location
 app/static/
+
