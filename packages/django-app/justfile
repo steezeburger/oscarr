@@ -82,7 +82,7 @@ dcp-run-tests:
   docker-compose run --rm -w /code/app web \
     pytest -m "not integration" --cov=. --verbose
 
-# generate a secret key for django and crypto stuff
+# generate a secret key for django
 dcp-generate-secret-key:
   docker-compose run --rm -w /code/app web \
     python -c \

@@ -5,7 +5,7 @@
   * just - https://github.com/casey/just
     * `brew install just` for mac os
 
-## Docker Compose
+## Docker Compose setup
 ```sh
 cd packages/django-app
 
@@ -29,7 +29,8 @@ just create-superuser
 # bring up web container
 just dcp-up-all
 
-# open up admin app (works for macos)
+# open up admin app and login as superuser you just created
+# for mac os
 open http://0.0.0.0:8000/admin
 ```
 
