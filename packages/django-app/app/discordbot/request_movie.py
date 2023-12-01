@@ -60,6 +60,9 @@ def create_discord_embed(item):
     tmdb_id = item.get('id', 'Unknown ID')
     overview = item.get('overview', 'No Overview')
 
+    if len(overview) > 320:
+        overview = overview[:320] + "..."
+
     embed.add_field(
         name=title,
         value=f"**Release Date**: {release_date}\n **ID**: {tmdb_id}\n **Overview**: {overview}\n",
@@ -90,6 +93,10 @@ def create_buttons(data) -> List[discord.ui.Button]:
 async def search_tmdb(interaction: discord.Interaction, title: str):
     print("searching tmdb via discord bot")
     results = TMDB.search_by_title(title)
+
+    if len(results['results']) == 0:
+        await interaction.response.send_message("No results found.")
+        return
 
     embeds = [create_discord_embed(item) for item in results['results'][:3]]
     buttons = create_buttons(results)
