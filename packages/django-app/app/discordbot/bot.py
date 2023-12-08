@@ -36,9 +36,11 @@ class OscarrBot(discord.Client):
         try:
             print(f"interaction: {interaction.data}")
             print(f"interaction type: {interaction.type}")
+            # FIXME - put this logic in its own function
             if interaction.type == discord.InteractionType.component:
                 custom_id = interaction.data['custom_id']
                 if custom_id.startswith("tmdb_"):
+                    await interaction.response.send_message("Working on it...")
                     tmdb_id = custom_id.split("_")[1]
                     form = RequestMovieForm({
                         'tmdb_id': tmdb_id,
@@ -47,10 +49,10 @@ class OscarrBot(discord.Client):
                     ok, message = await RequestOmbiMovieCommand(form).execute()
                     if not ok:
                         print(f"failed to request movie: {message}")
-                        await interaction.response.send_message(message)
+                        await interaction.edit_original_response(content=message)
                         return
                     else:
-                        await interaction.response.send_message(message)
+                        await interaction.edit_original_response(content=message)
         except Exception as e:
             print(f"error: {e}")
 

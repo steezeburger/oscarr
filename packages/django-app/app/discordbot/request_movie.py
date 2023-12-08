@@ -12,6 +12,8 @@ logger = logging.getLogger(__name__)
 
 @app_commands.command(name="request", description="Request a movie from the plex with a TMDB link.")
 async def request_movie(interaction: discord.Interaction, tmdb_id: str):
+    await interaction.response.send_message("Working on it...")
+
     print("requesting movie via discord bot")
 
     username = interaction.user.name
@@ -25,10 +27,10 @@ async def request_movie(interaction: discord.Interaction, tmdb_id: str):
 
     if not ok:
         print(f"failed to request movie: {message}")
-        await interaction.response.send_message(message)
+        await interaction.edit_original_response(content=message)
         return
     else:
-        await interaction.response.send_message(message)
+        await interaction.edit_original_response(content=message)
 
 
 def format_for_discord(data) -> str:
