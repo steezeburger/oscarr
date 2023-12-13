@@ -111,7 +111,6 @@ class UserAdmin(DjangoUserAdmin):
                                     'user_permissions')}),
 
         ('Important', {'fields': ('is_active',
-                                  'imported_at',
                                   'created_at',
                                   'modified_at',
                                   'deleted_at')}),
