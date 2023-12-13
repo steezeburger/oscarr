@@ -76,7 +76,6 @@ class RequestRadarrMovieCommand(AbstractBaseCommand):
 
 
 def get_ombi_request_from_tmdb_info(tmdb_info: dict, username: str) -> dict:
-    print(f"ombi uid map: {settings.OMBI_UID_MAP}")
     uid = settings.OMBI_UID_MAP.get("admin")
     if username in settings.OMBI_UID_MAP:
         uid = settings.OMBI_UID_MAP.get(username)

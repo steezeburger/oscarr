@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/4.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
-
+import json
 import os
 from pathlib import Path
 
@@ -203,9 +203,6 @@ SEEDBOX_PW = os.environ.get('SEEDBOX_PW')
 # tmdb
 TMDB_TOKEN_V3 = os.environ.get('TMDB_TOKEN_V3')
 
-OMBI_UID_MAP = {
-    "admin": os.environ.get('OMBI_ADMIN_UID'),
-    os.environ.get('OMBI_B_UN'): os.environ.get('OMBI_B_UID'),
-    os.environ.get('OMBI_S_UN'): os.environ.get('OMBI_S_UID'),
-    os.environ.get('OMBI_Y_UN'): os.environ.get('OMBI_Y_UID'),
-}
+
+uid_map = json.loads(os.environ.get('OMBI_UID_MAP'))
+OMBI_UID_MAP = {**uid_map, **{"admin": os.environ.get('OMBI_ADMIN_UID')}}
