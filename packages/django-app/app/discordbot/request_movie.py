@@ -10,7 +10,8 @@ from services.tmdb import TMDB
 logger = logging.getLogger(__name__)
 
 
-@app_commands.command(name="request", description="Request a movie from the plex with a TMDB link.")
+@app_commands.command(name="request",
+                      description="Request a movie from the plex with a TMDB link.")
 async def request_movie(interaction: discord.Interaction, tmdb_id: str):
     await interaction.response.send_message("Working on it...")
 
@@ -56,7 +57,9 @@ def format_for_discord(data) -> str:
 
 
 def create_discord_embed(item):
-    embed = discord.Embed(title="🎬 Top 3 Movies/Shows 🎬", color=0x1a1a1a)  # You can change the color
+    embed = discord.Embed(
+        title="🎬 Top 3 Movies/Shows 🎬",
+        color=0x1a1a1a)  # You can change the color
     title = item.get('title', 'No Title')
     release_date = item.get('release_date', 'Unknown Release Date')
     tmdb_id = item.get('id', 'Unknown ID')
@@ -91,7 +94,8 @@ def create_buttons(data) -> List[discord.ui.Button]:
     return buttons
 
 
-@app_commands.command(name="search_tmdb", description="Search TMDB for a movie.")
+@app_commands.command(name="search_tmdb",
+                      description="Search TMDB for a movie.")
 async def search_tmdb(interaction: discord.Interaction, title: str):
     print("searching tmdb via discord bot")
     results = TMDB.search_by_title(title)

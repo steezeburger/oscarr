@@ -17,5 +17,6 @@ class SoftDeleteModelManager(models.Manager):
     """
     Custom manager for models that use SoftDeleteTimestampMixin.
     """
+
     def get_queryset(self):
         return SoftDeleteQuerySet(self.model)

@@ -23,7 +23,8 @@ class UserRepository(BaseRepository):
     @classmethod
     def get_or_create(cls, *, data: dict):
         if 'discord_id' not in data and 'discord_username' not in data:
-            raise ValidationError("Input must include `discord_id` or `discord_username`")
+            raise ValidationError(
+                "Input must include `discord_id` or `discord_username`")
 
         user = None
         if 'discord_id' in data:
@@ -33,7 +34,8 @@ class UserRepository(BaseRepository):
 
         if not user:
             if 'nickname' not in data:
-                data['nickname'] = data.get('discord_username') or data.get('discord_id')
+                data['nickname'] = data.get(
+                    'discord_username') or data.get('discord_id')
             user = cls.create(data)
 
         return user

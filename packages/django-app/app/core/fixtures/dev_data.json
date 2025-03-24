@@ -272,7 +272,7 @@
     "model": "core.user",
     "fields": {
         "password": "pbkdf2_sha256$600000$y1osYkEsoRIXDt0iDEbeDu$GzMsCJP1XC/mbXq5P5/Um8nAZkz3Mx8F91YX5/m73z4=",
-        "last_login": "2023-11-28T02:22:26.477Z",
+        "last_login": "2025-03-24T06:44:48.165Z",
         "is_superuser": true,
         "created_at": "2023-11-28T02:22:23.753Z",
         "modified_at": "2023-11-28T02:22:23.753Z",
@@ -281,7 +281,25 @@
         "nickname": "admin",
         "is_staff": true,
         "discord_username": null,
-        "discord_id": null,
+        "ombi_uid": null,
+        "groups": [],
+        "user_permissions": []
+    }
+},
+{
+    "model": "core.user",
+    "fields": {
+        "password": "",
+        "last_login": null,
+        "is_superuser": false,
+        "created_at": "2025-03-24T07:06:44.999Z",
+        "modified_at": "2025-03-24T07:06:44.999Z",
+        "deleted_at": null,
+        "is_active": true,
+        "nickname": "steezeburger",
+        "is_staff": false,
+        "discord_username": "steezeburger",
+        "ombi_uid": "this-is-a-fake-uid",
         "groups": [],
         "user_permissions": []
     }

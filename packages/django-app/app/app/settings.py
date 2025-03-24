@@ -206,3 +206,4 @@ TMDB_TOKEN_V3 = os.environ.get('TMDB_TOKEN_V3')
 
 uid_map = json.loads(os.environ.get('OMBI_UID_MAP'))
 OMBI_UID_MAP = {**uid_map, **{"admin": os.environ.get('OMBI_ADMIN_UID')}}
+OMBI_ADMIN_UID = os.environ.get('OMBI_ADMIN_UID')

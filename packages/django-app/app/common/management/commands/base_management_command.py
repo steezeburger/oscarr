@@ -24,4 +24,5 @@ class BaseManagementCommand(BaseCommand):
 
         Copied directly from Django's code from django/core/management/base.py
         """
-        raise NotImplementedError('subclasses of BaseManagementCommand must provide a handle() method')
+        raise NotImplementedError(
+            'subclasses of BaseManagementCommand must provide a handle() method')

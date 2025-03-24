@@ -16,7 +16,7 @@ class Radarr:
     base_url = settings.RADARR_API_URL
 
     @classmethod
-    def get_movie(cls, *,  tmdb_id: str):
+    def get_movie(cls, *, tmdb_id: str):
         endpoint = f'{cls.base_url}/movie'
         res = requests.get(
             endpoint,

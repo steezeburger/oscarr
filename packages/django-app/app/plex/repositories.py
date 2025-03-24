@@ -44,7 +44,14 @@ class PlexMovieRepository(BaseRepository):
         return plex_movie
 
     @classmethod
-    def search(cls, *, title=None, actor=None, director=None, producer=None, writer=None):
+    def search(
+            cls,
+            *,
+            title=None,
+            actor=None,
+            director=None,
+            producer=None,
+            writer=None):
         movies = cls.model.objects.all()
 
         if title:
