@@ -11,13 +11,16 @@ from plex.models import PlexMovie
 
 logger = logging.getLogger(__name__)
 
-@app_commands.command(name="genre_pie", description="Generate a pie chart of the movie genres.")
+
+@app_commands.command(name="genre_pie",
+                      description="Generate a pie chart of the movie genres.")
 async def genre_pie(interaction: discord.Interaction):
     """
     Generate a pie chart of the movie genres
     """
 
-    # TODO - cache this and only recreate if a movie has been added since cached image
+    # TODO - cache this and only recreate if a movie has been added since
+    # cached image
 
     try:
         q = PlexMovie.objects.annotate(
@@ -35,8 +38,14 @@ async def genre_pie(interaction: discord.Interaction):
         # Create and save the pie chart
         pyplot.clf()
         fig, ax = pyplot.subplots()
-        ax.pie(sizes, labels=labels, autopct='%1.1f%%', shadow=True, startangle=90)
-        ax.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+        ax.pie(
+            sizes,
+            labels=labels,
+            autopct='%1.1f%%',
+            shadow=True,
+            startangle=90)
+        # Equal aspect ratio ensures that pie is drawn as a circle.
+        ax.axis('equal')
         fig.savefig('genre_pie_chart.png')
 
         # Send the pie chart image

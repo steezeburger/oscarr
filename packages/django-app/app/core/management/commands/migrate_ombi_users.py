@@ -11,7 +11,8 @@ class Command(BaseCommand):
     help = 'Migrates Discord username to Ombi UID mappings from environment variables to the database'
 
     def handle(self, *args, **options):
-        self.stdout.write(self.style.SUCCESS('Starting migration of Discord to Ombi UID mappings'))
+        self.stdout.write(self.style.SUCCESS(
+            'Starting migration of Discord to Ombi UID mappings'))
 
         # Get the uid_map from settings
         uid_map = settings.OMBI_UID_MAP
@@ -33,10 +34,12 @@ class Command(BaseCommand):
                     if not admin_user.ombi_uid:
                         admin_user.ombi_uid = admin_uid
                         admin_user.save()
-                        self.stdout.write(f'Updated admin user with discord username and Ombi UID {admin_uid}')
+                        self.stdout.write(
+                            f'Updated admin user with discord username and Ombi UID {admin_uid}')
                         migrated_count += 1
                     else:
-                        self.stdout.write(f'Admin user already has Ombi UID {admin_user.ombi_uid}')
+                        self.stdout.write(
+                            f'Admin user already has Ombi UID {admin_user.ombi_uid}')
                         skipped_count += 1
 
                 except User.DoesNotExist:
@@ -48,10 +51,12 @@ class Command(BaseCommand):
                         if not superuser.ombi_uid:
                             superuser.ombi_uid = admin_uid
                             superuser.save()
-                            self.stdout.write(f'Updated superuser {superuser.nickname} with admin discord username and Ombi UID {admin_uid}')
+                            self.stdout.write(
+                                f'Updated superuser {superuser.nickname} with admin discord username and Ombi UID {admin_uid}')
                             migrated_count += 1
                         else:
-                            self.stdout.write(f'Superuser {superuser.nickname} already has Ombi UID')
+                            self.stdout.write(
+                                f'Superuser {superuser.nickname} already has Ombi UID')
                             skipped_count += 1
                     else:
                         # Create a new admin user
@@ -61,11 +66,13 @@ class Command(BaseCommand):
                             ombi_uid=admin_uid,
                             is_staff=True
                         )
-                        self.stdout.write(f'Created admin user with Ombi UID {admin_uid}')
+                        self.stdout.write(
+                            f'Created admin user with Ombi UID {admin_uid}')
                         migrated_count += 1
 
             except Exception as e:
-                self.stdout.write(self.style.ERROR(f'Error handling admin user: {str(e)}'))
+                self.stdout.write(
+                    self.style.ERROR(f'Error handling admin user: {str(e)}'))
 
         # Process all users from uid_map
         for discord_username, ombi_uid in uid_map.items():
@@ -77,10 +84,12 @@ class Command(BaseCommand):
                 if not user.ombi_uid:
                     user.ombi_uid = ombi_uid
                     user.save()
-                    self.stdout.write(f'Updated existing user {discord_username} with Ombi UID {ombi_uid}')
+                    self.stdout.write(
+                        f'Updated existing user {discord_username} with Ombi UID {ombi_uid}')
                     migrated_count += 1
                 else:
-                    self.stdout.write(f'User {discord_username} already has Ombi UID {user.ombi_uid}')
+                    self.stdout.write(
+                        f'User {discord_username} already has Ombi UID {user.ombi_uid}')
                     skipped_count += 1
 
             except User.DoesNotExist:
@@ -90,7 +99,8 @@ class Command(BaseCommand):
                     discord_username=discord_username,
                     ombi_uid=ombi_uid
                 )
-                self.stdout.write(f'Created new user with discord_username {discord_username} and Ombi UID {ombi_uid}')
+                self.stdout.write(
+                    f'Created new user with discord_username {discord_username} and Ombi UID {ombi_uid}')
                 migrated_count += 1
 
         self.stdout.write(self.style.SUCCESS(

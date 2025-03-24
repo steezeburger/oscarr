@@ -129,7 +129,8 @@ class RequestOmbiMovieCommand(AbstractBaseCommand):
 
         try:
             # creates the movie request in ombi
-            ombi_request = get_ombi_request_from_tmdb_info(movie_info, self.form.cleaned_data['discord_username'])
+            ombi_request = get_ombi_request_from_tmdb_info(
+                movie_info, self.form.cleaned_data['discord_username'])
             Ombi.create_request(ombi_request)
             return True, f"Request created! \n https://www.themoviedb.org/movie/{movie_info.get('id')}"
         except Exception as e:

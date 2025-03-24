@@ -5,7 +5,8 @@ from discord import app_commands
 from plex.repositories import PlexMovieRepository
 
 
-@app_commands.command(name="search_plex", description="Search for movies by title, actor, etc.")
+@app_commands.command(name="search_plex",
+                      description="Search for movies by title, actor, etc.")
 async def search(
         interaction: discord.Interaction,
         all: str = None,

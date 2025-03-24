@@ -41,9 +41,10 @@ async def bacon(
         for actor in movie.actors:
             if actor not in added_actors:
                 actor = actor.lower()
-                graph.add_node(actor,
-                               type='actor',
-                               color='blue' if actor == from_actor else 'green')
+                graph.add_node(
+                    actor,
+                    type='actor',
+                    color='blue' if actor == from_actor else 'green')
                 added_actors.append(actor)
             graph.add_edge(movie_title, actor)
 
@@ -51,9 +52,10 @@ async def bacon(
             for director in movie.directors:
                 if director not in added_directors:
                     director = director.lower()
-                    graph.add_node(director,
-                                   type='directors',
-                                   color='yellow' if director == from_actor else 'green')
+                    graph.add_node(
+                        director,
+                        type='directors',
+                        color='yellow' if director == from_actor else 'green')
                     added_directors.append(director)
                 graph.add_edge(movie_title, director)
 
@@ -61,9 +63,10 @@ async def bacon(
             for producer in movie.producers:
                 if producer not in added_producers:
                     producer = producer.lower()
-                    graph.add_node(producer,
-                                   type='producers',
-                                   color='purple' if producer == from_actor else 'green')
+                    graph.add_node(
+                        producer,
+                        type='producers',
+                        color='purple' if producer == from_actor else 'green')
                     added_producers.append(producer)
                 graph.add_edge(movie_title, producer)
 
@@ -71,9 +74,10 @@ async def bacon(
             for writer in movie.writers:
                 if writer not in added_writers:
                     writer = writer.lower()
-                    graph.add_node(writer,
-                                   type='writers',
-                                   color='red' if writer == from_actor else 'green')
+                    graph.add_node(
+                        writer,
+                        type='writers',
+                        color='red' if writer == from_actor else 'green')
                     added_writers.append(writer)
                 graph.add_edge(movie_title, writer)
 
