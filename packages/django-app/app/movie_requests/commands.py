@@ -77,17 +77,18 @@ class RequestRadarrMovieCommand(AbstractBaseCommand):
 
 
 def get_ombi_request_from_tmdb_info(tmdb_info: dict, username: str) -> dict:
-    # default to admin UID if no user is found
-    uid = settings.OMBI_UID_MAP.get("admin")
+    # Default to admin UID
+    uid = settings.OMBI_ADMIN_UID
 
+    # Try to find the requesting user by discord_username
     try:
         user = User.objects.get(discord_username=username)
         if user.ombi_uid:
             uid = user.ombi_uid
+        # If user exists but has no ombi_uid, we'll use the default
     except User.DoesNotExist:
-        # if user not found, fallback to the settings map (for backward compatibility)
-        if username in settings.OMBI_UID_MAP:
-            uid = settings.OMBI_UID_MAP.get(username)
+        # If user not found, we'll use the default
+        pass
 
     return {
         "theMovieDbId": tmdb_info.get('id'),
