@@ -1,6 +1,7 @@
 import stringcase
 from django.conf import settings
 from django.forms import fields
+from asgiref.sync import sync_to_async
 
 from common.commands.abstract_base_command import AbstractBaseCommand
 from common.forms.base_form import BaseForm
@@ -76,19 +77,29 @@ class RequestRadarrMovieCommand(AbstractBaseCommand):
         return True, f"Request created!"
 
 
-def get_ombi_request_from_tmdb_info(tmdb_info: dict, username: str) -> dict:
+async def get_ombi_request_from_tmdb_info(tmdb_info: dict, username: str) -> dict:
     # Default to admin UID
-    uid = settings.OMBI_ADMIN_UID
+    uid = settings.OMBI_UID_MAP.get('admin')
 
-    # Try to find the requesting user by discord_username
-    try:
-        user = User.objects.get(discord_username=username)
-        if user.ombi_uid:
-            uid = user.ombi_uid
-        # If user exists but has no ombi_uid, we'll use the default
-    except User.DoesNotExist:
-        # If user not found, we'll use the default
-        pass
+    # Define a synchronous function to get the user's Ombi UID
+    def get_user_ombi_uid(username):
+        try:
+            user = User.objects.get(discord_username=username)
+            if user.ombi_uid:
+                return user.ombi_uid
+            return None
+        except User.DoesNotExist:
+            return None
+
+    # Wrap the synchronous function with sync_to_async
+    get_user_ombi_uid_async = sync_to_async(get_user_ombi_uid)
+    
+    # Call the async function
+    user_uid = await get_user_ombi_uid_async(username)
+    
+    # Use the user's UID if found, otherwise default to admin
+    if user_uid:
+        uid = user_uid
 
     return {
         "theMovieDbId": tmdb_info.get('id'),
@@ -129,7 +140,7 @@ class RequestOmbiMovieCommand(AbstractBaseCommand):
 
         try:
             # creates the movie request in ombi
-            ombi_request = get_ombi_request_from_tmdb_info(
+            ombi_request = await get_ombi_request_from_tmdb_info(
                 movie_info, self.form.cleaned_data['discord_username'])
             Ombi.create_request(ombi_request)
             return True, f"Request created! \n https://www.themoviedb.org/movie/{movie_info.get('id')}"
