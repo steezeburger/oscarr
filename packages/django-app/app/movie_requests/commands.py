@@ -4,6 +4,7 @@ from django.forms import fields
 
 from common.commands.abstract_base_command import AbstractBaseCommand
 from common.forms.base_form import BaseForm
+from core.models import User
 from services.ombi import Ombi
 from services.radarr import Radarr
 from services.tmdb import TMDB
@@ -76,9 +77,18 @@ class RequestRadarrMovieCommand(AbstractBaseCommand):
 
 
 def get_ombi_request_from_tmdb_info(tmdb_info: dict, username: str) -> dict:
+    # default to admin UID if no user is found
     uid = settings.OMBI_UID_MAP.get("admin")
-    if username in settings.OMBI_UID_MAP:
-        uid = settings.OMBI_UID_MAP.get(username)
+
+    try:
+        user = User.objects.get(discord_username=username)
+        if user.ombi_uid:
+            uid = user.ombi_uid
+    except User.DoesNotExist:
+        # if user not found, fallback to the settings map (for backward compatibility)
+        if username in settings.OMBI_UID_MAP:
+            uid = settings.OMBI_UID_MAP.get(username)
+
     return {
         "theMovieDbId": tmdb_info.get('id'),
         "languageCode": "en",
@@ -117,7 +127,7 @@ class RequestOmbiMovieCommand(AbstractBaseCommand):
         print(f"movie info: {movie_info}")
 
         try:
-            # creates the movie in ombi
+            # creates the movie request in ombi
             ombi_request = get_ombi_request_from_tmdb_info(movie_info, self.form.cleaned_data['discord_username'])
             Ombi.create_request(ombi_request)
             return True, f"Request created! \n https://www.themoviedb.org/movie/{movie_info.get('id')}"

@@ -95,6 +95,8 @@ class UserAdmin(DjangoUserAdmin):
                 'nickname',
                 'password1',
                 'password2',
+                'discord_username',
+                'ombi_uid',
                 'is_superuser',
                 'is_staff',
                 'is_active',
@@ -104,6 +106,9 @@ class UserAdmin(DjangoUserAdmin):
     fieldsets = (
         (None, {'fields': ('nickname',
                            'password',)}),
+
+        ('Discord Info', {'fields': ('discord_username',
+                                     'ombi_uid')}),
 
         ('Permissions', {'fields': ('is_staff',
                                     'is_superuser',
@@ -118,10 +123,12 @@ class UserAdmin(DjangoUserAdmin):
 
     list_display = [
         'id',
+        'nickname',
+        'discord_username',
+        'ombi_uid',
         'is_active',
         'is_staff',
         'is_superuser',
-        'nickname',
     ]
 
     list_display_links = ['id', 'nickname']
@@ -138,4 +145,6 @@ class UserAdmin(DjangoUserAdmin):
 
     search_fields = (
         'nickname',
+        'discord_username',
+        'ombi_uid',
     )

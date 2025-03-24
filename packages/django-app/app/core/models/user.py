@@ -35,12 +35,11 @@ class User(CRUDTimestampsMixin,
         blank=True,
         null=True)
 
-    discord_id = fields.CharPGPSymmetricKeyField(
+    ombi_uid = models.CharField(
         max_length=255,
-        db_index=True,
-        unique=True,
         blank=True,
-        null=True)
+        null=True,
+        help_text=_('The Ombi user ID for this user'))
 
     def __str__(self):
         return self.nickname
