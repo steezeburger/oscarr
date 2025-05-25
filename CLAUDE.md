@@ -16,6 +16,7 @@ All commands should be run from `/packages/django-app/` directory using the `jus
 - `just generate-pg-secret-key` - Generate PostgreSQL encryption key
 - `just create-superuser` - Create Django admin user
 - `just dcp-load-dev-data` - Load fixture data (admin:password login)
+- `just setup-local-python-venv` - Create local Python virtual environment and install dependencies
 
 ### Development Workflow
 - `just dcp-up-all` - Start all containers (web + db)
@@ -31,6 +32,11 @@ All commands should be run from `/packages/django-app/` directory using the `jus
 - `just dcp-dumpdata` - Export database to JSON
 - `just create-json-backup` - Create timestamped JSON backup
 - `just create-pgdump` - Create PostgreSQL dump backup
+
+### Utility Commands
+- `just update-oscarr` - Pull latest code, build, migrate, and restart containers
+- `just dcp-cleanup` - Stop and remove all containers and volumes
+- `just dcp-build-images` - Build both web and database Docker images
 
 ## Architecture
 
@@ -85,3 +91,10 @@ See `.env.template` for required environment variables.
 - Tests exclude integration tests by default (use `-m "not integration"`)
 - The bot runs as a separate management command (`start_discord_bot`)
 - Plex sync should be run periodically to keep movie data current
+
+## Local Development Setup
+
+1. **Python Environment**: Use pyenv to install Python 3.11.4, then run `just setup-local-python-venv`
+2. **Docker Setup**: Run `just init-dcp` to initialize Docker containers and volumes
+3. **Database**: Run `just dcp-migrate` to apply database migrations
+4. **Development Data**: Run `just dcp-load-dev-data` to load test data (admin:password)
