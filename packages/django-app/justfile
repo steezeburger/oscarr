@@ -7,7 +7,7 @@ sync-with-plex:
 
 # starts the discord bot in a container
 start-discord-bot:
-  docker-compose run -d --rm -w /code/app web /code/app/manage.py start_discord_bot
+  docker compose run -d --rm -w /code/app web /code/app/manage.py start_discord_bot
 
 # create python venv and install dependencies
 setup-local-python-venv:
@@ -18,7 +18,7 @@ setup-local-python-venv:
 default_backups_location := "./backups"
 # create backup with pgdump. must set some envars
 create-pgdump location=default_backups_location:
-  docker-compose exec db pg_dump -U $POSTGRES_USER $POSTGRES_DB > {{location}}/`date +%Y-%m-%d_%H-%M-%S`-oscarrdump.sql
+  docker compose exec db pg_dump -U $POSTGRES_USER $POSTGRES_DB > {{location}}/`date +%Y-%m-%d_%H-%M-%S`-oscarrdump.sql
 # creates a json backup of the db
 create-json-backup location=default_backups_location:
   just dcp-dumpdata > {{location}}/`date +%Y-%m-%d_%H-%M-%S`-oscarrdump.json
@@ -26,16 +26,16 @@ create-json-backup location=default_backups_location:
 # pulls latest code, builds web image, migrates db, restarts web container
 update-oscarr:
   git pull origin main
-  docker-compose build web
+  docker compose build web
   ./bin/dcp-django-admin.sh migrate
-  docker-compose stop web
-  docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d web
+  docker compose stop web
+  docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d web
 
 # create volumes, build images
 init-dcp:
   docker volume create --name=oscarr_postgres
-  docker-compose build
-  docker-compose up -d db
+  docker compose build
+  docker compose up -d db
   ./bin/wait-for-it.sh localhost:5432 -- echo "db is up"
 
 # create django admin superuser
@@ -49,8 +49,8 @@ generate-pg-secret-key:
 
 # cleanup all dcp stuff
 dcp-cleanup:
-  docker-compose stop
-  docker-compose rm -f db web
+  docker compose stop
+  docker compose rm -f db web
   docker volume rm oscarr_postgres
 
 # creates docker volume for postgres data
@@ -59,22 +59,22 @@ d-create-volumes:
 
 # build web image
 dcp-build-web:
-  docker-compose build web
+  docker compose build web
 
 # build db image
 dcp-build-db:
-  docker-compose build db
+  docker compose build db
 
 # build web and db images
 dcp-build-images: dcp-build-web dcp-build-db
 
 # run web and db containers
 dcp-up-all:
-  docker-compose up -d
+  docker compose up -d
 
 # stop web and db containers
 dcp-stop-all:
-  docker-compose stop
+  docker compose stop
 
 # migrate db
 dcp-migrate:
@@ -95,15 +95,15 @@ dcp-load-dev-data:
 
 # run tests, excluding integration tests
 dcp-run-tests:
-  docker-compose run --rm -w /code/app web \
+  docker compose run --rm -w /code/app web \
     pytest -m "not integration" --cov=. --verbose
 
 # generate a secret key for django
 dcp-generate-secret-key:
-  docker-compose run --rm -w /code/app web \
+  docker compose run --rm -w /code/app web \
     python -c \
     'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())'
 
 # format python code
 dcp-format:
-  docker-compose run --rm -w /code/app web bash -c "find . -name '*.py' -type f -not -path '*/migrations/*' | xargs autopep8 --in-place --aggressive --aggressive"
+  docker compose run --rm -w /code/app web bash -c "find . -name '*.py' -type f -not -path '*/migrations/*' | xargs autopep8 --in-place --aggressive --aggressive"
