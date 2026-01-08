@@ -6,6 +6,7 @@ from plexapi.myplex import MyPlexAccount
 
 from common.commands.abstract_base_command import AbstractBaseCommand
 from plex.repositories import PlexMovieRepository
+from services.tmdb import TMDB
 
 logger = logging.getLogger(__name__)
 
@@ -40,12 +41,19 @@ class SyncWithPlexCommand(AbstractBaseCommand):
                 return
 
             try:
+                # Get actors from Plex
+                plex_actors = [t.tag for t in movie.actors]
+
+                # Augment with TMDB actors
+                actors = self._get_augmented_actors(
+                    movie.title, movie.year, plex_actors)
+
                 movie_details = {
                     'plex_guid': movie.guid,
                     'title': movie.title,
                     'year': movie.year,
                     'duration': movie.duration,
-                    'actors': [t.tag for t in movie.actors],
+                    'actors': actors,
                     'genres': [t.tag for t in movie.genres],
                     'directors': [t.tag for t in movie.directors],
                     'producers': [t.tag for t in movie.producers],
@@ -59,3 +67,82 @@ class SyncWithPlexCommand(AbstractBaseCommand):
             except Exception as e:
                 logger.exception(f"Failed to create PlexMovie: {movie}")
                 logger.exception(e)
+
+    def _get_augmented_actors(self, title: str, year: int,
+                               plex_actors: list) -> list:
+        """
+        Fetch actors from TMDB and merge with Plex actors.
+        Returns a deduplicated list preserving order.
+        """
+        try:
+            tmdb_movie = TMDB.search_by_title_and_year(title, year)
+            if tmdb_movie:
+                tmdb_id = tmdb_movie['id']
+                tmdb_actors = TMDB.get_movie_credits(tmdb_id, cast_limit=20)
+
+                # Merge: TMDB actors first (more complete), then Plex actors
+                seen = set()
+                merged = []
+                for actor in tmdb_actors + plex_actors:
+                    actor_lower = actor.lower()
+                    if actor_lower not in seen:
+                        seen.add(actor_lower)
+                        merged.append(actor)
+                return merged
+        except Exception as e:
+            logger.warning(f"Failed to fetch TMDB actors for {title}: {e}")
+
+        return plex_actors
+
+
+class BackfillActorsCommand(AbstractBaseCommand):
+    """
+    Backfill TMDB actors for existing PlexMovie records.
+    Fetches top 20 actors from TMDB and merges with existing actors.
+    """
+
+    def execute(self) -> None:
+        super().execute()
+
+        movies = PlexMovieRepository.model.objects.all()
+        total = movies.count()
+        updated = 0
+        failed = 0
+
+        for i, movie in enumerate(movies, 1):
+            try:
+                tmdb_movie = TMDB.search_by_title_and_year(movie.title,
+                                                           movie.year)
+                if tmdb_movie:
+                    tmdb_id = tmdb_movie['id']
+                    tmdb_actors = TMDB.get_movie_credits(tmdb_id, cast_limit=20)
+
+                    # Merge actors (TMDB first, then existing)
+                    existing_actors = movie.actors or []
+                    seen = set()
+                    merged = []
+                    for actor in tmdb_actors + existing_actors:
+                        actor_lower = actor.lower()
+                        if actor_lower not in seen:
+                            seen.add(actor_lower)
+                            merged.append(actor)
+
+                    if len(merged) > len(existing_actors):
+                        movie.actors = merged
+                        movie.save()
+                        updated += 1
+                        print(f'[{i}/{total}] Updated: {movie.title} '
+                              f'({len(existing_actors)} -> {len(merged)} actors)')
+                    else:
+                        print(f'[{i}/{total}] Skipped: {movie.title} '
+                              f'(no new actors)')
+                else:
+                    print(f'[{i}/{total}] Not found on TMDB: {movie.title}')
+                    failed += 1
+
+            except Exception as e:
+                logger.exception(f"Failed to backfill actors for: {movie}")
+                failed += 1
+
+        print(f'\nBackfill complete: {updated} updated, {failed} failed, '
+              f'{total - updated - failed} unchanged')
