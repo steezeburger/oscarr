@@ -16,6 +16,23 @@ class TMDB:
         return response
 
     @classmethod
+    def get_movie_cast(cls, tmdb_id: int) -> list:
+        """
+        Fetch cast list from TMDB for a given movie ID.
+        Returns a list of actor names.
+        """
+        try:
+            movie = tmdb.Movies(tmdb_id)
+            response = movie.info(append_to_response='credits')
+            
+            cast = response.get('credits', {}).get('cast', [])
+            actor_names = [actor['name'] for actor in cast]
+            return actor_names
+        except Exception as e:
+            # If TMDB call fails, return empty list (graceful fallback)
+            return []
+
+    @classmethod
     def search_by_title(cls, title: str):
         search = tmdb.Search()
         response = search.movie(query=title)
