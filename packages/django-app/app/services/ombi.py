@@ -2,14 +2,10 @@ import json
 import logging
 
 import requests
-import tmdbsimple as tmdb
 from django.conf import settings
 from requests.auth import HTTPBasicAuth
 
 logger = logging.getLogger(__name__)
-
-tmdb.API_KEY = settings.TMDB_TOKEN_V3
-tmdb.REQUESTS_SESSION = requests.Session()
 
 
 class Ombi:
