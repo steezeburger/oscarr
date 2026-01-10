@@ -1,0 +1,35 @@
+[project]
+name = "oscarr"
+version = "0.1.0"
+description = "Discord bot that connects to Plex and Ombi"
+requires-python = ">=3.11.4"
+dependencies = [
+    "django==4.2.5",
+    "django-extensions==3.2.3",
+    "psycopg2-binary==2.9.7",
+    "stringcase==1.2.0",
+    "plexapi==4.15.1",
+    "discord.py",
+    "django-pgcrypto-fields",
+    "pandas",
+    "networkx",
+    "matplotlib",
+    "tmdbsimple",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest==7.4.2",
+    "pytest-cov",
+    "pytest-django",
+    "pytest-xdist",
+    "autopep8",
+    "factory-boy",
+    "pylint",
+    "pylint-django",
+    "flake8",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
