@@ -39,7 +39,11 @@ class Plex:
         return server.library.section('Movies')
 
     @classmethod
-    def fetch_movies(cls, sort='addedAt:desc', container_start=0, container_size=5):
+    def fetch_movies(
+            cls,
+            sort='addedAt:desc',
+            container_start=0,
+            container_size=5):
         """
         Fetch movies from the Plex library with pagination and sorting.
 
