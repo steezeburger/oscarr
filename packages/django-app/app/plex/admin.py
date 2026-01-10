@@ -31,6 +31,11 @@ class PlexMovieAdmin(admin.ModelAdmin):
         'writers',
     )
 
+    def get_form(self, request, obj=None, **kwargs):
+        form = super().get_form(request, obj, **kwargs)
+        form.base_fields['deleted_at'].required = False
+        return form
+
     actions = ['force_delete_plex_movie']
 
     @admin.action(description='!!! FORCE DELETE PLEX MOVIE !!!')

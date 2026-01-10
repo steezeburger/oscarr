@@ -11,8 +11,6 @@ class UserFactory(DjangoModelFactory):
 
     nickname = factory.Faker('user_name')
 
-    discord_id = factory.Faker('ssn')
-
     discord_username = factory.Faker('ssn')
 
     is_active = True

@@ -22,20 +22,17 @@ class UserRepository(BaseRepository):
 
     @classmethod
     def get_or_create(cls, *, data: dict):
-        if 'discord_id' not in data and 'discord_username' not in data:
+        if 'discord_username' not in data:
             raise ValidationError(
-                "Input must include `discord_id` or `discord_username`")
+                "Input must include `discord_username`")
 
         user = None
-        if 'discord_id' in data:
-            user = cls.get_by_discord_id(data['discord_id'])
-        if not user and 'discord_username' in data:
+        if 'discord_username' in data:
             user = cls.get_by_discord_username(data['discord_username'])
 
         if not user:
             if 'nickname' not in data:
-                data['nickname'] = data.get(
-                    'discord_username') or data.get('discord_id')
+                data['nickname'] = data.get('discord_username')
             user = cls.create(data)
 
         return user
@@ -48,15 +45,6 @@ class UserRepository(BaseRepository):
             user.is_active = data['is_active']
 
         user.save()
-        return user
-
-    @classmethod
-    def get_by_discord_id(cls, discord_id):
-        try:
-            user = cls.model.objects.get(discord_id=discord_id)
-        except cls.model.DoesNotExist:
-            return None
-
         return user
 
     @classmethod

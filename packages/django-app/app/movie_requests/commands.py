@@ -93,10 +93,10 @@ async def get_ombi_request_from_tmdb_info(tmdb_info: dict, username: str) -> dic
 
     # Wrap the synchronous function with sync_to_async
     get_user_ombi_uid_async = sync_to_async(get_user_ombi_uid)
-    
+
     # Call the async function
     user_uid = await get_user_ombi_uid_async(username)
-    
+
     # Use the user's UID if found, otherwise default to admin
     if user_uid:
         uid = user_uid
