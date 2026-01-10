@@ -22,7 +22,7 @@ interface for managing media requests.
   * `/search_plex director: tom` - search for a movie by director
   * `/search_plex producer: tom` - search for a movie by producer
 * `/get_random` - get random movie from the Plex server
-* `/genre_pie` -
+* `/genre_pie` - display a pie chart showing genre distribution on the Plex server
 * `/bacon from: keanu reeves to: nicolas cage` - show the hops between actors in
   movies that are on the Plex server
 

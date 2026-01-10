@@ -13,10 +13,10 @@ logger = logging.getLogger(__name__)
 
 
 @app_commands.command(name="genre_pie",
-                      description="Generate a pie chart of the movie genres.")
+                      description="Displays a pie chart showing genre distribution on the Plex server")
 async def genre_pie(interaction: discord.Interaction):
     """
-    Generate a pie chart of the movie genres
+    Displays a pie chart showing genre distribution on the Plex server
     """
 
     # TODO - cache this and only recreate if a movie has been added since
