@@ -1,7 +1,5 @@
 import logging
-import re
 from datetime import timezone
-from typing import Optional
 
 from django.conf import settings
 from plexapi.myplex import MyPlexAccount
@@ -84,33 +82,6 @@ class Plex:
             'producers': [t.tag for t in movie.producers],
             'writers': [t.tag for t in movie.writers],
         }
-
-    @staticmethod
-    def extract_tmdb_id_from_guid(guid: str) -> Optional[int]:
-        """
-        Extract TMDB ID from a Plex GUID string.
-
-        Plex GUIDs can have various formats:
-        - com.plexapp.agents.themoviedb://12345?lang=en
-        - plex://movie/5d776825880197001ec967c8
-
-        Args:
-            guid: Plex GUID string
-
-        Returns:
-            TMDB ID as integer if found, None otherwise
-        """
-        if not guid:
-            return None
-
-        # Match TMDB agent format
-        tmdb_pattern = r'com\.plexapp\.agents\.themoviedb://(\d+)'
-        match = re.search(tmdb_pattern, guid)
-
-        if match:
-            return int(match.group(1))
-
-        return None
 
     @staticmethod
     def normalize_added_at(added_at):
