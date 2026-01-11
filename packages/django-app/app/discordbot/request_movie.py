@@ -92,7 +92,8 @@ def create_buttons(data) -> List[discord.ui.Button]:
             title = item['title']
             # Discord button labels must be 80 characters or fewer
             # "Request " is 8 characters, leaving 72 for the title
-            # If truncated, add "..." (leaving 69 chars for title + 3 for ellipsis)
+            # If truncated, add "..." (leaving 69 chars for title + 3 for
+            # ellipsis)
             max_title_length = 72
             if len(title) > max_title_length:
                 title = title[:69] + "..."
