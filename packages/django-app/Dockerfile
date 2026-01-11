@@ -12,10 +12,13 @@ ENV PATH="/root/.cargo/bin:${PATH}"
 RUN mkdir /code
 WORKDIR /code
 COPY pyproject.toml uv.lock /code/
-RUN uv pip install --system -e ".[dev]"
+RUN uv sync --frozen
 
 # install application into container
 COPY . /code
+
+# add virtual environment to PATH
+ENV PATH="/code/.venv/bin:$PATH"
 
 # make directories for our logs and backups
 RUN mkdir -p /logs
