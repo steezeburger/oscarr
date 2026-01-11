@@ -6,7 +6,7 @@ ENV PYTHONUNBUFFERED 1
 RUN apt-get update && apt-get install -y build-essential libssl-dev libffi-dev python3-dev cargo curl
 RUN pip install --upgrade pip
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
-ENV PATH="/root/.cargo/bin:${PATH}"
+ENV PATH="/root/.local/bin:${PATH}"
 
 # install python dependencies
 RUN mkdir /code
