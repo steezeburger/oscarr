@@ -14,7 +14,6 @@ dependencies = [
     "pandas",
     "networkx",
     "matplotlib",
-    "tmdbsimple",
 ]
 
 [project.optional-dependencies]
