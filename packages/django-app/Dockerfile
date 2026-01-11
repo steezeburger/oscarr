@@ -12,7 +12,7 @@ ENV PATH="/root/.local/bin:${PATH}"
 RUN mkdir /code
 WORKDIR /code
 COPY pyproject.toml uv.lock /code/
-RUN uv sync --frozen
+RUN uv sync --frozen --no-install-project
 
 # install application into container
 COPY . /code
