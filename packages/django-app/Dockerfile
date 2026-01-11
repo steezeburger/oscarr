@@ -1,20 +1,26 @@
 FROM python:3.11.4-slim as base
 ENV PYTHONUNBUFFERED 1
 
-# install pipenv and compilation dependencies
+# install uv and compilation dependencies
 # https://cryptography.io/en/latest/installation/
-RUN apt-get update && apt-get install -y build-essential libssl-dev libffi-dev python3-dev cargo
-RUN pip install --upgrade pip pipenv
+RUN apt-get update && apt-get install -y build-essential libssl-dev libffi-dev python3-dev cargo curl
+RUN pip install --upgrade pip
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh
+ENV PATH="/root/.local/bin:${PATH}"
 
 # install python dependencies
 RUN mkdir /code
 WORKDIR /code
-COPY Pipfile /code
-COPY Pipfile.lock /code
-RUN pipenv install --dev --deploy --system
+COPY pyproject.toml uv.lock /code/
+# Set venv location outside /code to avoid volume mount conflicts
+ENV UV_PROJECT_ENVIRONMENT=/opt/venv
+RUN uv sync --frozen --no-install-project
 
 # install application into container
 COPY . /code
+
+# add virtual environment to PATH
+ENV PATH="/opt/venv/bin:$PATH"
 
 # make directories for our logs and backups
 RUN mkdir -p /logs

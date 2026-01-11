@@ -11,9 +11,7 @@ start-discord-bot:
 
 # create python venv and install dependencies
 setup-local-python-venv:
-  python3 -m venv .venv
-  source .venv/bin/activate
-  PIPENV_VENV_IN_PROJECT=1 pipenv install --dev --deploy
+  uv sync --no-install-project
 
 default_backups_location := "./backups"
 # create backup with pgdump. must set some envars
