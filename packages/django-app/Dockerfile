@@ -12,13 +12,15 @@ ENV PATH="/root/.local/bin:${PATH}"
 RUN mkdir /code
 WORKDIR /code
 COPY pyproject.toml uv.lock /code/
+# Set venv location outside /code to avoid volume mount conflicts
+ENV UV_PROJECT_ENVIRONMENT=/opt/venv
 RUN uv sync --frozen --no-install-project
 
 # install application into container
 COPY . /code
 
 # add virtual environment to PATH
-ENV PATH="/code/.venv/bin:$PATH"
+ENV PATH="/opt/venv/bin:$PATH"
 
 # make directories for our logs and backups
 RUN mkdir -p /logs
