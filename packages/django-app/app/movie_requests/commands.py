@@ -1,4 +1,5 @@
 import stringcase
+from aiohttp import ClientSession
 from django.conf import settings
 from django.forms import fields
 from asgiref.sync import sync_to_async
@@ -40,14 +41,15 @@ class RequestRadarrMovieCommand(AbstractBaseCommand):
     Command for requesting a movie on Radarr.
     """
 
-    def __init__(self, form: 'RequestMovieForm'):
+    def __init__(self, form: 'RequestMovieForm', session: ClientSession):
         self.form = form
+        self.session = session
 
     async def execute(self) -> (bool, str):
         super().execute()
 
         tmdb_id = self.form.cleaned_data['tmdb_id']
-        existing_request = Radarr.get_movie(tmdb_id=tmdb_id)
+        existing_request = await Radarr.get_movie(tmdb_id=tmdb_id, session=self.session)
 
         print(f"existing radarr movie: {existing_request}")
 
@@ -60,7 +62,7 @@ class RequestRadarrMovieCommand(AbstractBaseCommand):
             return False, message
 
         # get movie info from TMDB, so we can create a request for radarr
-        movie_info = TMDB.get_movie_by_id(tmdb_id)
+        movie_info = await TMDB.get_movie_by_id(tmdb_id, session=self.session)
         if movie_info.get('belongs_to_collection'):
             message = (
                 f"This movie belongs to a collection, and I don't know how to handle that yet.\r\n"
@@ -70,7 +72,7 @@ class RequestRadarrMovieCommand(AbstractBaseCommand):
         try:
             # creates the movie in Radarr
             radarr_request = get_radarr_request_from_tmdb_info(movie_info)
-            Radarr.create_movie(radarr_request)
+            await Radarr.create_movie(radarr_request, session=self.session)
         except Exception as e:
             return False, f"Failed to create movie on Radarr: {str(e)}"
 
@@ -116,14 +118,15 @@ class RequestOmbiMovieCommand(AbstractBaseCommand):
     Command for requesting a movie on Ombi.
     """
 
-    def __init__(self, form: 'RequestMovieForm'):
+    def __init__(self, form: 'RequestMovieForm', session: ClientSession):
         self.form = form
+        self.session = session
 
     async def execute(self) -> (bool, str):
         super().execute()
 
         tmdb_id = self.form.cleaned_data['tmdb_id']
-        existing_request = Radarr.get_movie(tmdb_id=tmdb_id)
+        existing_request = await Radarr.get_movie(tmdb_id=tmdb_id, session=self.session)
 
         print(f"existing radarr movie: {existing_request}")
 
@@ -135,14 +138,14 @@ class RequestOmbiMovieCommand(AbstractBaseCommand):
                 f"Reach out to the server administrator if you think there is an issue.")
             return False, message
 
-        movie_info = TMDB.get_movie_by_id(tmdb_id)
+        movie_info = await TMDB.get_movie_by_id(tmdb_id, session=self.session)
         print(f"movie info: {movie_info}")
 
         try:
             # creates the movie request in ombi
             ombi_request = await get_ombi_request_from_tmdb_info(
                 movie_info, self.form.cleaned_data['discord_username'])
-            Ombi.create_request(ombi_request)
+            await Ombi.create_request(ombi_request, session=self.session)
             return True, f"Request created! \n https://www.themoviedb.org/movie/{movie_info.get('id')}"
         except Exception as e:
             return False, f"Failed to create movie on Ombi: {str(e)}"

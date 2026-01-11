@@ -46,7 +46,7 @@ class OscarrBot(discord.Client):
                         'tmdb_id': tmdb_id,
                         'discord_username': interaction.user.name,
                     })
-                    ok, message = await RequestOmbiMovieCommand(form).execute()
+                    ok, message = await RequestOmbiMovieCommand(form, self.web_client).execute()
                     if not ok:
                         print(f"failed to request movie: {message}")
                         await interaction.edit_original_response(content=message)

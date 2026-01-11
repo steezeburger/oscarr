@@ -1,9 +1,8 @@
 import json
 import logging
 
-import requests
+from aiohttp import BasicAuth, ClientSession
 from django.conf import settings
-from requests.auth import HTTPBasicAuth
 
 logger = logging.getLogger(__name__)
 
@@ -12,7 +11,7 @@ class Ombi:
     base_url = settings.OMBI_API_URL
 
     @classmethod
-    def create_request(cls, data: dict) -> dict:
+    async def create_request(cls, data: dict, session: ClientSession) -> dict:
         """
         Creates a request in Ombi.
         `addOptions.searchForMovie` must be True so Radarr will immediately search for the torrent file.
@@ -22,21 +21,23 @@ class Ombi:
             'content-type': 'application/json',
             'ApiKey': settings.OMBI_API_KEY,
         }
+        params = {'apiKey': settings.RADARR_API_KEY}
+        auth = BasicAuth(settings.SEEDBOX_UN, settings.SEEDBOX_PW)
 
-        res = requests.post(
+        async with session.post(
             endpoint,
             # FIXME - this auth is specific to a singular seedbox.
             #  how to make this configurable? plugin system? webhook?
-            auth=HTTPBasicAuth(settings.SEEDBOX_UN, settings.SEEDBOX_PW),
-            params={'apiKey': settings.RADARR_API_KEY},
+            auth=auth,
+            params=params,
             data=json.dumps(data),
-            headers=headers)
+            headers=headers
+        ) as response:
+            if not response.ok:
+                text = await response.text()
+                logger.error(f'status: {response.status}')
+                logger.error(text)
+                raise Exception(f'status: {response.status} {text}')
 
-        if not res.ok:
-            print(f'status: {res.status_code}')
-            print(res.text)
-            raise Exception(f'status: {res.status_code} '
-                            f'{res.text}')
-
-        data = res.json()
-        return data
+            data = await response.json()
+            return data

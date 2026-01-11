@@ -1,9 +1,8 @@
 import json
 import logging
 
-import requests
+from aiohttp import BasicAuth, ClientSession
 from django.conf import settings
-from requests.auth import HTTPBasicAuth
 
 logger = logging.getLogger(__name__)
 
@@ -12,29 +11,27 @@ class Radarr:
     base_url = settings.RADARR_API_URL
 
     @classmethod
-    def get_movie(cls, *, tmdb_id: str):
+    async def get_movie(cls, *, tmdb_id: str, session: ClientSession):
         endpoint = f'{cls.base_url}/movie'
-        res = requests.get(
-            endpoint,
-            auth=HTTPBasicAuth(settings.SEEDBOX_UN, settings.SEEDBOX_PW),
-            params={'apiKey': settings.RADARR_API_KEY, 'tmdbId': tmdb_id},
-        )
+        params = {'apiKey': settings.RADARR_API_KEY, 'tmdbId': tmdb_id}
+        auth = BasicAuth(settings.SEEDBOX_UN, settings.SEEDBOX_PW)
 
-        if not res.ok:
-            logger.exception(f'status: {res.status_code}')
-            logger.exception(res.text)
-            raise Exception(f'status: {res.status_code} '
-                            f'{res.text}')
+        async with session.get(endpoint, auth=auth, params=params) as response:
+            if not response.ok:
+                text = await response.text()
+                logger.exception(f'status: {response.status}')
+                logger.exception(text)
+                raise Exception(f'status: {response.status} {text}')
 
-        data = res.json()
+            data = await response.json()
 
-        if len(data) > 0:
-            return data[0]
+            if len(data) > 0:
+                return data[0]
 
-        return data
+            return data
 
     @classmethod
-    def create_movie(cls, data: dict) -> dict:
+    async def create_movie(cls, data: dict, session: ClientSession) -> dict:
         """
         Creates a Movie in Radarr.
         `addOptions.searchForMovie` must be True so Radarr will immediately search for the torrent file.
@@ -59,19 +56,21 @@ class Radarr:
                 'url': data['full_poster_path'],
             }],
         }
+        params = {'apiKey': settings.RADARR_API_KEY}
+        auth = BasicAuth(settings.SEEDBOX_UN, settings.SEEDBOX_PW)
 
-        res = requests.post(
+        async with session.post(
             endpoint,
             # FIXME - this auth is specific to a singular seedbox.
             #  how to make this configurable? plugin system? webhook?
-            auth=HTTPBasicAuth(settings.SEEDBOX_UN, settings.SEEDBOX_PW),
-            params={'apiKey': settings.RADARR_API_KEY},
+            auth=auth,
+            params=params,
             data=json.dumps(body),
-            headers=headers)
+            headers=headers
+        ) as response:
+            if not response.ok:
+                text = await response.text()
+                raise Exception(f'status: {response.status} {text}')
 
-        if not res.ok:
-            raise Exception(f'status: {res.status_code} '
-                            f'{res.text}')
-
-        data = res.json()
-        return data
+            data = await response.json()
+            return data
