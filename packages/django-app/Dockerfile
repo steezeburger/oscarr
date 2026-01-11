@@ -12,7 +12,7 @@ ENV PATH="/root/.cargo/bin:${PATH}"
 RUN mkdir /code
 WORKDIR /code
 COPY pyproject.toml uv.lock /code/
-RUN uv pip install --system -r pyproject.toml --extra dev
+RUN uv pip install --system -e ".[dev]"
 
 # install application into container
 COPY . /code

@@ -11,8 +11,7 @@ start-discord-bot:
 
 # create python venv and install dependencies
 setup-local-python-venv:
-  uv venv .venv
-  uv pip install -r pyproject.toml --extra dev
+  uv sync
 
 default_backups_location := "./backups"
 # create backup with pgdump. must set some envars
