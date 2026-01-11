@@ -14,7 +14,7 @@ WORKDIR /code
 COPY pyproject.toml uv.lock /code/
 # Set venv location outside /code to avoid volume mount conflicts
 ENV UV_PROJECT_ENVIRONMENT=/opt/venv
-RUN uv sync --frozen --no-install-project
+RUN uv sync --frozen --no-install-project --all-extras
 
 # install application into container
 COPY . /code
