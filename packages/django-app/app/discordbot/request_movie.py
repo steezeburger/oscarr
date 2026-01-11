@@ -20,11 +20,14 @@ async def request_movie(interaction: discord.Interaction, tmdb_id: str):
     username = interaction.user.name
     print(f"username: {username}")
 
+    # Get the session from the bot client
+    session = interaction.client.web_client
+
     form = RequestMovieForm({
         'tmdb_id': tmdb_id,
         'discord_username': username,
     })
-    ok, message = await RequestOmbiMovieCommand(form).execute()
+    ok, message = await RequestOmbiMovieCommand(form, session).execute()
 
     if not ok:
         print(f"failed to request movie: {message}")
@@ -89,7 +92,8 @@ def create_buttons(data) -> List[discord.ui.Button]:
             title = item['title']
             # Discord button labels must be 80 characters or fewer
             # "Request " is 8 characters, leaving 72 for the title
-            # If truncated, add "..." (leaving 69 chars for title + 3 for ellipsis)
+            # If truncated, add "..." (leaving 69 chars for title + 3 for
+            # ellipsis)
             max_title_length = 72
             if len(title) > max_title_length:
                 title = title[:69] + "..."
@@ -106,7 +110,10 @@ def create_buttons(data) -> List[discord.ui.Button]:
                       description="Search TMDB for a movie.")
 async def search_tmdb(interaction: discord.Interaction, title: str):
     print("searching tmdb via discord bot")
-    results = TMDB.search_by_title(title)
+
+    # Get the session from the bot client
+    session = interaction.client.web_client
+    results = await TMDB.search_by_title(title, session)
 
     if len(results['results']) == 0:
         await interaction.response.send_message("No results found.")
