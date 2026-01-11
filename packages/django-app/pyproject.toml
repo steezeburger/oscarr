@@ -16,7 +16,7 @@ dependencies = [
     "matplotlib",
 ]
 
-[project.optional-dependencies]
+[dependency-groups]
 dev = [
     "pytest==7.4.2",
     "pytest-cov",

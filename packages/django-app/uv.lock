@@ -1165,7 +1165,7 @@ dependencies = [
     { name = "stringcase" },
 ]
 
-[package.optional-dependencies]
+[package.dev-dependencies]
 dev = [
     { name = "autopep8" },
     { name = "factory-boy" },
@@ -1180,27 +1180,30 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "autopep8", marker = "extra == 'dev'" },
     { name = "discord-py" },
     { name = "django", specifier = "==4.2.5" },
     { name = "django-extensions", specifier = "==3.2.3" },
     { name = "django-pgcrypto-fields" },
-    { name = "factory-boy", marker = "extra == 'dev'" },
-    { name = "flake8", marker = "extra == 'dev'" },
     { name = "matplotlib" },
     { name = "networkx" },
     { name = "pandas" },
     { name = "plexapi", specifier = "==4.15.1" },
     { name = "psycopg2-binary", specifier = "==2.9.7" },
-    { name = "pylint", marker = "extra == 'dev'" },
-    { name = "pylint-django", marker = "extra == 'dev'" },
-    { name = "pytest", marker = "extra == 'dev'", specifier = "==7.4.2" },
-    { name = "pytest-cov", marker = "extra == 'dev'" },
-    { name = "pytest-django", marker = "extra == 'dev'" },
-    { name = "pytest-xdist", marker = "extra == 'dev'" },
     { name = "stringcase", specifier = "==1.2.0" },
 ]
-provides-extras = ["dev"]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "autopep8" },
+    { name = "factory-boy" },
+    { name = "flake8" },
+    { name = "pylint" },
+    { name = "pylint-django" },
+    { name = "pytest", specifier = "==7.4.2" },
+    { name = "pytest-cov" },
+    { name = "pytest-django" },
+    { name = "pytest-xdist" },
+]
 
 [[package]]
 name = "packaging"
