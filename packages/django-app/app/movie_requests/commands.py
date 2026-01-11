@@ -77,7 +77,8 @@ class RequestRadarrMovieCommand(AbstractBaseCommand):
         return True, f"Request created!"
 
 
-async def get_ombi_request_from_tmdb_info(tmdb_info: dict, username: str) -> dict:
+async def get_ombi_request_from_tmdb_info(
+        tmdb_info: dict, username: str) -> dict:
     # Default to admin UID
     uid = settings.OMBI_UID_MAP.get('admin')
 
