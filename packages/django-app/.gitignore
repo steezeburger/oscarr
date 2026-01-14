@@ -3,7 +3,6 @@
 
 # environment files
 .env
-.env.test
 
 # logs from the application
 logs/
