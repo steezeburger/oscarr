@@ -15,5 +15,10 @@ app/media/
 # static files location
 app/static/
 
+# tool caches
+.ruff_cache/
+.pytest_cache/
+.mypy_cache/
+
 # prod
 docker-compose.prod.yml
