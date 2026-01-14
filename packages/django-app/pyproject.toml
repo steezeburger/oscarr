@@ -2,7 +2,7 @@
 name = "oscarr"
 version = "0.1.0"
 description = "Discord bot that connects to Plex and Ombi"
-requires-python = ">=3.11.4,<3.14"
+requires-python = ">=3.11.4,<3.13"
 dependencies = [
     "django==4.2.5",
     "django-extensions==3.2.3",

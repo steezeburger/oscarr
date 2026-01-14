@@ -120,16 +120,16 @@ dcp-typecheck:
 
 # format code locally (requires local venv)
 format:
-  uv run ruff format app
+  uv run --python 3.11 ruff format app
 
 # lint code locally (requires local venv)
 lint:
-  uv run ruff check app
+  uv run --python 3.11 ruff check app
 
 # lint and auto-fix issues locally
 lint-fix:
-  uv run ruff check --fix app
+  uv run --python 3.11 ruff check --fix app
 
 # run type checking locally
 typecheck:
-  uv run pyright app
+  uv run --python 3.11 pyright app
