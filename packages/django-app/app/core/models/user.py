@@ -26,7 +26,7 @@ class User(CRUDTimestampsMixin, SoftDeleteTimestampMixin, AbstractBaseUser, Perm
     )
 
     ombi_uid = models.CharField(
-        max_length=255, blank=True, null=True, help_text=_("The Ombi user ID for this user")
+        max_length=255, blank=True, default="", help_text=_("The Ombi user ID for this user")
     )
 
     def __str__(self):
