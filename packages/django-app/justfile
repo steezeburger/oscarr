@@ -133,3 +133,7 @@ lint-fix:
 # run type checking locally
 typecheck:
   uv run pyright app
+
+# run tests locally, excluding integration tests (requires environment variables)
+test:
+  uv run pytest app -m "not integration" --cov=app --verbose
