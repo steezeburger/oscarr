@@ -1,9 +1,6 @@
-from typing import Optional
-
 import discord
 from aiohttp import ClientSession
 from discord import app_commands
-
 from discordbot.bacon import bacon
 from discordbot.get_random import get_random
 from discordbot.request_movie import request_movie, search_tmdb
@@ -17,7 +14,7 @@ class OscarrBot(discord.Client):
         self,
         *args,
         web_client: ClientSession,
-        intents: Optional[discord.Intents] = None,
+        intents: discord.Intents | None = None,
     ):
         """Client initialization."""
         if intents is None:

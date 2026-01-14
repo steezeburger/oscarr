@@ -1,6 +1,6 @@
+from core.test_helpers import UserFactory
 from django.test import TestCase
 
-from core.test_helpers import UserFactory
 from plex.repositories import PlexMovieRepository
 from plex.test_helpers import PlexMovieFactory
 

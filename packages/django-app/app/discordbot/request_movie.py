@@ -1,9 +1,7 @@
 import logging
-from typing import List
 
 import discord
 from discord import app_commands
-
 from movie_requests.commands import RequestMovieForm, RequestOmbiMovieCommand
 from services.tmdb import TMDB
 
@@ -86,7 +84,7 @@ def create_discord_embed(item):
     return embed
 
 
-def create_buttons(data) -> List[discord.ui.Button]:
+def create_buttons(data) -> list[discord.ui.Button]:
     buttons = []
     for item in data["results"][:3]:
         tmdb_id = item.get("id", None)

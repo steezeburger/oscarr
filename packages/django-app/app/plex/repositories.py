@@ -1,7 +1,7 @@
 from asgiref.sync import sync_to_async
+from common.repositories.base_repository import BaseRepository
 from django.db.models import Q
 
-from common.repositories.base_repository import BaseRepository
 from plex.models import PlexMovie
 
 

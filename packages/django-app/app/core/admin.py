@@ -1,5 +1,4 @@
 # Register your models here.
-from core.models import User
 from django import forms
 from django.contrib import admin
 from django.contrib.auth import password_validation
@@ -7,6 +6,8 @@ from django.contrib.auth.admin import UserAdmin as DjangoUserAdmin
 from django.contrib.auth.forms import UserChangeForm
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
+
+from core.models import User
 
 
 class UserCreationForm(forms.ModelForm):

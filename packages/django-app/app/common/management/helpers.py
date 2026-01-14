@@ -8,7 +8,7 @@ def get_file_contents(path):
     file_contents = None
     for e in encodings:
         try:
-            file_reader = open(path, "r", encoding=e)
+            file_reader = open(path, encoding=e)
             file_contents = file_reader.read()
         except UnicodeDecodeError:
             print(f"got unicode error with {e}, trying different encoding")

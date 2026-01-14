@@ -1,7 +1,6 @@
-from django import forms
-
 from common.commands.abstract_base_command import AbstractBaseCommand
 from common.forms.base_form import BaseForm
+from django import forms
 
 
 class PlayMovieForm(BaseForm):

@@ -1,7 +1,6 @@
-from django import forms
-
 from common.forms.base_form import BaseForm
-from core.repositories import UserRepository, AccountRepository
+from core.repositories import UserRepository
+from django import forms
 
 
 class CreatedByFormMixin(BaseForm):

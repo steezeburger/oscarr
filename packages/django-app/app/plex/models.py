@@ -1,9 +1,8 @@
+from common.models.crud_timestamps_mixin import CRUDTimestampsMixin
+from common.models.soft_delete_timestamp_mixin import SoftDeleteTimestampMixin
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-
-from common.models.crud_timestamps_mixin import CRUDTimestampsMixin
-from common.models.soft_delete_timestamp_mixin import SoftDeleteTimestampMixin
 
 
 class PlexMovie(SoftDeleteTimestampMixin, CRUDTimestampsMixin):

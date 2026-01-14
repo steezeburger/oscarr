@@ -1,12 +1,11 @@
 import stringcase
 from aiohttp import ClientSession
-from django.conf import settings
-from django.forms import fields
 from asgiref.sync import sync_to_async
-
 from common.commands.abstract_base_command import AbstractBaseCommand
 from common.forms.base_form import BaseForm
 from core.models import User
+from django.conf import settings
+from django.forms import fields
 from services.ombi import Ombi
 from services.radarr import Radarr
 from services.tmdb import TMDB
@@ -54,11 +53,11 @@ class RequestRadarrMovieCommand(AbstractBaseCommand):
         print(f"existing radarr movie: {existing_request}")
 
         if existing_request and existing_request["sizeOnDisk"] > 0:
-            return False, f"This request has already been fulfilled."
+            return False, "This request has already been fulfilled."
         if existing_request and existing_request["sizeOnDisk"] == 0:
             message = (
-                f"This movie has already been requested.\r\n"
-                f"Reach out to the server administrator if you think there is an issue."
+                "This movie has already been requested.\r\n"
+                "Reach out to the server administrator if you think there is an issue."
             )
             return False, message
 
@@ -66,8 +65,8 @@ class RequestRadarrMovieCommand(AbstractBaseCommand):
         movie_info = await TMDB.get_movie_by_id(tmdb_id, session=self.session)
         if movie_info.get("belongs_to_collection"):
             message = (
-                f"This movie belongs to a collection, and I don't know how to handle that yet.\r\n"
-                f"Try requesting just the individual movie."
+                "This movie belongs to a collection, and I don't know how to handle that yet.\r\n"
+                "Try requesting just the individual movie."
             )
             return False, message
 
@@ -78,7 +77,7 @@ class RequestRadarrMovieCommand(AbstractBaseCommand):
         except Exception as e:
             return False, f"Failed to create movie on Radarr: {str(e)}"
 
-        return True, f"Request created!"
+        return True, "Request created!"
 
 
 async def get_ombi_request_from_tmdb_info(tmdb_info: dict, username: str) -> dict:

@@ -1,5 +1,5 @@
 import logging
-from datetime import timezone
+from datetime import UTC
 
 from django.conf import settings
 from plexapi.myplex import MyPlexAccount
@@ -88,4 +88,4 @@ class Plex:
         Returns:
             datetime with UTC timezone
         """
-        return added_at.replace(tzinfo=timezone.utc)
+        return added_at.replace(tzinfo=UTC)

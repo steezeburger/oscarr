@@ -1,7 +1,6 @@
 import logging
 
 from django.core.management import BaseCommand
-
 from plex.commands import SyncWithPlexCommand
 
 logger = logging.getLogger(__name__)

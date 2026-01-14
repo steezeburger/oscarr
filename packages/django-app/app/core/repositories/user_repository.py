@@ -1,7 +1,6 @@
-from django.core.exceptions import ValidationError
-
 from common.repositories.base_repository import BaseRepository
 from core.models import User
+from django.core.exceptions import ValidationError
 
 
 class UserRepository(BaseRepository):

@@ -1,8 +1,7 @@
+from common.managers.soft_delete_model_manager import SoftDeleteModelManager
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-
-from common.managers.soft_delete_model_manager import SoftDeleteModelManager
 
 is_active_help_text = _(
     "Designates whether this object should be treated as active. "
@@ -23,6 +22,9 @@ class SoftDeleteTimestampMixin(models.Model):
 
     objects = SoftDeleteModelManager()
 
+    class Meta:
+        abstract = True
+
     def delete(self, *args, **kwargs):
         if kwargs.pop("force_delete", None):
             super().delete(*args, **kwargs)
@@ -35,6 +37,3 @@ class SoftDeleteTimestampMixin(models.Model):
         self.is_active = True
         self.deleted_at = None
         super().save()
-
-    class Meta:
-        abstract = True

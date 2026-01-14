@@ -3,10 +3,9 @@ import os
 
 import discord
 from asgiref.sync import sync_to_async
-from discord import app_commands, File
-from django.db.models import Count, Func, F
+from discord import File, app_commands
+from django.db.models import Count, F, Func
 from matplotlib import pyplot
-
 from plex.models import PlexMovie
 
 logger = logging.getLogger(__name__)

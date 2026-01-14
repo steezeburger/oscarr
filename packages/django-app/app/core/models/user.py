@@ -1,10 +1,10 @@
+from common.models.crud_timestamps_mixin import CRUDTimestampsMixin
+from common.models.soft_delete_timestamp_mixin import SoftDeleteTimestampMixin
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from pgcrypto import fields
 
-from common.models.crud_timestamps_mixin import CRUDTimestampsMixin
-from common.models.soft_delete_timestamp_mixin import SoftDeleteTimestampMixin
 from core.managers import UserManager
 
 

@@ -1,7 +1,6 @@
 import discord
 from asgiref.sync import sync_to_async
 from discord import app_commands
-
 from plex.repositories import PlexMovieRepository
 
 
@@ -36,4 +35,4 @@ async def search(
         message = prepend + message
         await interaction.response.send_message(f"```{message}```")
     else:
-        await interaction.response.send_message(f"No movies found.")
+        await interaction.response.send_message("No movies found.")

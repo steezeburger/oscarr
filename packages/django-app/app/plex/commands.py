@@ -1,8 +1,9 @@
 import logging
 
 from common.commands.abstract_base_command import AbstractBaseCommand
-from plex.repositories import PlexMovieRepository
 from services.plex import Plex
+
+from plex.repositories import PlexMovieRepository
 
 logger = logging.getLogger(__name__)
 
