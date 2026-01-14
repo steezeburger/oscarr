@@ -1,3 +1,5 @@
+set dotenv-load
+
 default:
   @just --list
 
@@ -136,14 +138,4 @@ typecheck:
 
 # run tests locally, excluding integration tests (uses .env file)
 test:
-  #!/usr/bin/env bash
-  set -euo pipefail
-  if [ -f .env ]; then
-    set -a
-    source .env
-    set +a
-  else
-    echo "Error: .env file not found. Copy .env.template to .env and configure it."
-    exit 1
-  fi
   uv run pytest app -m "not integration" --cov=app --verbose
