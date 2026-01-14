@@ -1,3 +1,5 @@
+set dotenv-load
+
 default:
   @just --list
 
@@ -102,6 +104,38 @@ dcp-generate-secret-key:
     python -c \
     'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())'
 
-# format python code
+# format python code with ruff
 dcp-format:
-  docker compose run --rm -w /code/app web bash -c "find . -name '*.py' -type f -not -path '*/migrations/*' | xargs autopep8 --in-place --aggressive --aggressive"
+  docker compose run --rm -w /code/app web ruff format .
+
+# lint python code with ruff
+dcp-lint:
+  docker compose run --rm -w /code/app web ruff check .
+
+# lint and auto-fix issues
+dcp-lint-fix:
+  docker compose run --rm -w /code/app web ruff check --fix .
+
+# run type checking with pyright
+dcp-typecheck:
+  docker compose run --rm -w /code/app web pyright app
+
+# format code locally (requires local venv)
+format:
+  uv run ruff format app
+
+# lint code locally (requires local venv)
+lint:
+  uv run ruff check app
+
+# lint and auto-fix issues locally
+lint-fix:
+  uv run ruff check --fix app
+
+# run type checking locally
+typecheck:
+  uv run pyright app
+
+# run tests locally, excluding integration tests (uses .env file)
+test:
+  uv run pytest app -m "not integration" --cov=app --verbose

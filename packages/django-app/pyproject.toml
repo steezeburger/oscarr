@@ -2,11 +2,11 @@
 name = "oscarr"
 version = "0.1.0"
 description = "Discord bot that connects to Plex and Ombi"
-requires-python = ">=3.11.4"
+requires-python = ">=3.12,<3.13"
 dependencies = [
-    "django==4.2.5",
+    "django>=4.2,<5.0",
     "django-extensions==3.2.3",
-    "psycopg2-binary==2.9.7",
+    "psycopg[binary]>=3.1",
     "stringcase==1.2.0",
     "plexapi==4.15.1",
     "discord.py",
@@ -22,9 +22,46 @@ dev = [
     "pytest-cov",
     "pytest-django",
     "pytest-xdist",
-    "autopep8",
     "factory-boy",
-    "pylint",
-    "pylint-django",
-    "flake8",
+    "ruff",
+    "pyright",
 ]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "UP",  # pyupgrade
+    "DJ",  # flake8-django
+]
+ignore = [
+    "E501",  # line too long, handled by formatter
+]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]  # unused imports in __init__.py
+"*/migrations/*.py" = ["E501", "DJ01"]  # Django migrations
+"*/tests/*.py" = ["B011"]  # allow assert False
+
+[tool.ruff.lint.isort]
+known-first-party = ["oscarr"]
+section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
+
+[tool.pyright]
+pythonVersion = "3.12"
+typeCheckingMode = "basic"
+exclude = [
+    "**/migrations",
+    "**/__pycache__",
+    ".venv",
+]
+reportMissingImports = true
+reportMissingTypeStubs = false
