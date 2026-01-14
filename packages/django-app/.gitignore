@@ -1,6 +1,10 @@
 # data for management commands
 **/management/commands/data/
 
+# environment files
+.env
+.env.test
+
 # logs from the application
 logs/
 backups/

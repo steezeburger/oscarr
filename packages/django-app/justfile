@@ -134,6 +134,16 @@ lint-fix:
 typecheck:
   uv run pyright app
 
-# run tests locally, excluding integration tests (requires environment variables)
+# run tests locally, excluding integration tests (requires .env.test file)
 test:
+  #!/usr/bin/env bash
+  set -euo pipefail
+  if [ -f .env.test ]; then
+    set -a
+    source .env.test
+    set +a
+  else
+    echo "Error: .env.test file not found. Copy .env.test.example to .env.test and configure it."
+    exit 1
+  fi
   uv run pytest app -m "not integration" --cov=app --verbose
