@@ -4,15 +4,16 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0004_remove_user_discord_id'),
+        ("core", "0004_remove_user_discord_id"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='user',
-            name='ombi_uid',
-            field=models.CharField(blank=True, default='', help_text='The Ombi user ID for this user', max_length=255),
+            model_name="user",
+            name="ombi_uid",
+            field=models.CharField(
+                blank=True, default="", help_text="The Ombi user ID for this user", max_length=255
+            ),
         ),
     ]
