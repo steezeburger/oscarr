@@ -11,7 +11,7 @@ start-discord-bot:
 
 # create python venv and install dependencies
 setup-local-python-venv:
-  uv sync --no-install-project --python 3.11
+  uv sync --no-install-project
 
 default_backups_location := "./backups"
 # create backup with pgdump. must set some envars
@@ -120,16 +120,16 @@ dcp-typecheck:
 
 # format code locally (requires local venv)
 format:
-  uv run --python 3.11 ruff format app
+  uv run ruff format app
 
 # lint code locally (requires local venv)
 lint:
-  uv run --python 3.11 ruff check app
+  uv run ruff check app
 
 # lint and auto-fix issues locally
 lint-fix:
-  uv run --python 3.11 ruff check --fix app
+  uv run ruff check --fix app
 
 # run type checking locally
 typecheck:
-  uv run --python 3.11 pyright app
+  uv run pyright app
