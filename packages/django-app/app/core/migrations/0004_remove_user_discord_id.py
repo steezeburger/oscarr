@@ -4,14 +4,13 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0003_user_ombi_uid'),
+        ("core", "0003_user_ombi_uid"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='user',
-            name='discord_id',
+            model_name="user",
+            name="discord_id",
         ),
     ]

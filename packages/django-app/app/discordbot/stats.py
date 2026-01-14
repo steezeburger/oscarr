@@ -12,8 +12,10 @@ from plex.models import PlexMovie
 logger = logging.getLogger(__name__)
 
 
-@app_commands.command(name="genre_pie",
-                      description="Displays a pie chart showing genre distribution on the Plex server")
+@app_commands.command(
+    name="genre_pie",
+    description="Displays a pie chart showing genre distribution on the Plex server",
+)
 async def genre_pie(interaction: discord.Interaction):
     """
     Displays a pie chart showing genre distribution on the Plex server
@@ -23,11 +25,13 @@ async def genre_pie(interaction: discord.Interaction):
     # cached image
 
     try:
-        q = PlexMovie.objects.annotate(
-            genre=Func(F('genres'), function='unnest')
-        ).values('genre').order_by('genre').annotate(
-            count=Count('title')
-        ).values_list('genre', 'count')
+        q = (
+            PlexMovie.objects.annotate(genre=Func(F("genres"), function="unnest"))
+            .values("genre")
+            .order_by("genre")
+            .annotate(count=Count("title"))
+            .values_list("genre", "count")
+        )
 
         genre_counts = await sync_to_async(list)(q)
 
@@ -38,21 +42,16 @@ async def genre_pie(interaction: discord.Interaction):
         # Create and save the pie chart
         pyplot.clf()
         fig, ax = pyplot.subplots()
-        ax.pie(
-            sizes,
-            labels=labels,
-            autopct='%1.1f%%',
-            shadow=True,
-            startangle=90)
+        ax.pie(sizes, labels=labels, autopct="%1.1f%%", shadow=True, startangle=90)
         # Equal aspect ratio ensures that pie is drawn as a circle.
-        ax.axis('equal')
-        fig.savefig('genre_pie_chart.png')
+        ax.axis("equal")
+        fig.savefig("genre_pie_chart.png")
 
         # Send the pie chart image
-        await interaction.response.send_message(file=File('genre_pie_chart.png'))
+        await interaction.response.send_message(file=File("genre_pie_chart.png"))
 
         # Remove the image file
-        os.remove('genre_pie_chart.png')
+        os.remove("genre_pie_chart.png")
     except Exception as e:
         logger.warning(f"Error generating genre pie chart: {e}")
         await interaction.response.send_message(f"Error: {e}")

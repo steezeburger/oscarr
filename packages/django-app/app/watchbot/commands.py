@@ -8,6 +8,7 @@ class PlayMovieForm(BaseForm):
     """
     Form for playing a movie.
     """
+
     movie_id = forms.IntegerField()
 
 
@@ -16,7 +17,7 @@ class PlayMovieCommand(AbstractBaseCommand):
     Command for playing a movie.
     """
 
-    def __init__(self, form: 'PlayMovieForm'):
+    def __init__(self, form: "PlayMovieForm"):
         self.form = form
 
     def execute(self) -> None:

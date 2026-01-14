@@ -2,5 +2,5 @@ from django.apps import AppConfig
 
 
 class PlexConfig(AppConfig):
-    default_auto_field = 'django.db.models.BigAutoField'
-    name = 'plex'
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "plex"

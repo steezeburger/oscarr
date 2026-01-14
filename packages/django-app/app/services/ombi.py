@@ -16,12 +16,12 @@ class Ombi:
         Creates a request in Ombi.
         `addOptions.searchForMovie` must be True so Radarr will immediately search for the torrent file.
         """
-        endpoint = f'{cls.base_url}/Request/movie'
+        endpoint = f"{cls.base_url}/Request/movie"
         headers = {
-            'content-type': 'application/json',
-            'ApiKey': settings.OMBI_API_KEY,
+            "content-type": "application/json",
+            "ApiKey": settings.OMBI_API_KEY,
         }
-        params = {'apiKey': settings.RADARR_API_KEY}
+        params = {"apiKey": settings.RADARR_API_KEY}
         auth = BasicAuth(settings.SEEDBOX_UN, settings.SEEDBOX_PW)
 
         async with session.post(
@@ -31,13 +31,13 @@ class Ombi:
             auth=auth,
             params=params,
             data=json.dumps(data),
-            headers=headers
+            headers=headers,
         ) as response:
             if not response.ok:
                 text = await response.text()
-                logger.error(f'status: {response.status}')
+                logger.error(f"status: {response.status}")
                 logger.error(text)
-                raise Exception(f'status: {response.status} {text}')
+                raise Exception(f"status: {response.status} {text}")
 
             data = await response.json()
             return data

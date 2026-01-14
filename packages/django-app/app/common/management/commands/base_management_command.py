@@ -12,9 +12,7 @@ class BaseManagementCommand(BaseCommand):
         Add dry_run argument for every management command by default.
         """
         parser.add_argument(
-            '--dry_run',
-            help='Run script with out saving changes to database.',
-            action='store_true'
+            "--dry_run", help="Run script with out saving changes to database.", action="store_true"
         )
 
     def handle(self, *args, **options):
@@ -25,4 +23,5 @@ class BaseManagementCommand(BaseCommand):
         Copied directly from Django's code from django/core/management/base.py
         """
         raise NotImplementedError(
-            'subclasses of BaseManagementCommand must provide a handle() method')
+            "subclasses of BaseManagementCommand must provide a handle() method"
+        )

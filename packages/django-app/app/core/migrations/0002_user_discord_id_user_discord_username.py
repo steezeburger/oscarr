@@ -5,20 +5,23 @@ import pgcrypto.fields
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0001_initial'),
+        ("core", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='user',
-            name='discord_id',
-            field=pgcrypto.fields.CharPGPSymmetricKeyField(blank=True, db_index=True, max_length=255, null=True, unique=True),
+            model_name="user",
+            name="discord_id",
+            field=pgcrypto.fields.CharPGPSymmetricKeyField(
+                blank=True, db_index=True, max_length=255, null=True, unique=True
+            ),
         ),
         migrations.AddField(
-            model_name='user',
-            name='discord_username',
-            field=pgcrypto.fields.CharPGPSymmetricKeyField(blank=True, db_index=True, max_length=255, null=True, unique=True),
+            model_name="user",
+            name="discord_username",
+            field=pgcrypto.fields.CharPGPSymmetricKeyField(
+                blank=True, db_index=True, max_length=255, null=True, unique=True
+            ),
         ),
     ]

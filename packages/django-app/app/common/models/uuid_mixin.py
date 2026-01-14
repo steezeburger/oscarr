@@ -7,6 +7,7 @@ class UUIDModelMixin(models.Model):
     """
     `uuid` field will be auto set with uuid4 values
     """
+
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
 
     class Meta:

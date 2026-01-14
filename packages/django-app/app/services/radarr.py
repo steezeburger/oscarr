@@ -12,16 +12,16 @@ class Radarr:
 
     @classmethod
     async def get_movie(cls, *, tmdb_id: str, session: ClientSession):
-        endpoint = f'{cls.base_url}/movie'
-        params = {'apiKey': settings.RADARR_API_KEY, 'tmdbId': tmdb_id}
+        endpoint = f"{cls.base_url}/movie"
+        params = {"apiKey": settings.RADARR_API_KEY, "tmdbId": tmdb_id}
         auth = BasicAuth(settings.SEEDBOX_UN, settings.SEEDBOX_PW)
 
         async with session.get(endpoint, auth=auth, params=params) as response:
             if not response.ok:
                 text = await response.text()
-                logger.exception(f'status: {response.status}')
+                logger.exception(f"status: {response.status}")
                 logger.exception(text)
-                raise Exception(f'status: {response.status} {text}')
+                raise Exception(f"status: {response.status} {text}")
 
             data = await response.json()
 
@@ -36,27 +36,29 @@ class Radarr:
         Creates a Movie in Radarr.
         `addOptions.searchForMovie` must be True so Radarr will immediately search for the torrent file.
         """
-        endpoint = f'{cls.base_url}/movie'
-        headers = {'content-type': 'application/json'}
+        endpoint = f"{cls.base_url}/movie"
+        headers = {"content-type": "application/json"}
         body = {
-            'monitored': True,
-            'minimumAvailability': 'announced',
-            'addOptions': {
-                'monitor': 'movieOnly',
-                'searchForMovie': True,
-                'addMethod': 'manual',
+            "monitored": True,
+            "minimumAvailability": "announced",
+            "addOptions": {
+                "monitor": "movieOnly",
+                "searchForMovie": True,
+                "addMethod": "manual",
             },
-            'qualityProfileId': settings.RADARR_QUALITY_PROFILE_ID,
-            'rootFolderPath': settings.RADARR_ROOT_FOLDER_PATH,
-            'tmdbid': data['tmdb_id'],
-            'title': data['title'],
-            'titleslug': data['title_slug'],
-            'images': [{
-                'coverType': 'poster',
-                'url': data['full_poster_path'],
-            }],
+            "qualityProfileId": settings.RADARR_QUALITY_PROFILE_ID,
+            "rootFolderPath": settings.RADARR_ROOT_FOLDER_PATH,
+            "tmdbid": data["tmdb_id"],
+            "title": data["title"],
+            "titleslug": data["title_slug"],
+            "images": [
+                {
+                    "coverType": "poster",
+                    "url": data["full_poster_path"],
+                }
+            ],
         }
-        params = {'apiKey': settings.RADARR_API_KEY}
+        params = {"apiKey": settings.RADARR_API_KEY}
         auth = BasicAuth(settings.SEEDBOX_UN, settings.SEEDBOX_PW)
 
         async with session.post(
@@ -66,11 +68,11 @@ class Radarr:
             auth=auth,
             params=params,
             data=json.dumps(body),
-            headers=headers
+            headers=headers,
         ) as response:
             if not response.ok:
                 text = await response.text()
-                raise Exception(f'status: {response.status} {text}')
+                raise Exception(f"status: {response.status} {text}")
 
             data = await response.json()
             return data

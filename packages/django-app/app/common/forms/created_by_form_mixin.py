@@ -12,5 +12,5 @@ class CreatedByFormMixin(BaseForm):
 
         # created_by is not required when updating
         form_name = type(self).__name__
-        if form_name.startswith('Update'):
-            self.fields['created_by'].required = False
+        if form_name.startswith("Update"):
+            self.fields["created_by"].required = False

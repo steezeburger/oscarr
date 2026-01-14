@@ -11,8 +11,8 @@ from discordbot.bot import OscarrBot
 async def run():
     async with ClientSession() as web_client:
         async with OscarrBot(
-                commands.when_mentioned,
-                web_client=web_client,
+            commands.when_mentioned,
+            web_client=web_client,
         ) as client:
             await client.start(settings.DISCORD_TOKEN)
 
