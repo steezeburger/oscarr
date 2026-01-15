@@ -1,8 +1,9 @@
 import logging
 
 from common.commands.abstract_base_command import AbstractBaseCommand
-from plex.repositories import PlexMovieRepository
 from services.plex import Plex
+
+from plex.repositories import PlexMovieRepository
 
 logger = logging.getLogger(__name__)
 
@@ -22,9 +23,7 @@ class SyncWithPlexCommand(AbstractBaseCommand):
 
         latest_movie = PlexMovieRepository.get_latest()
 
-        for movie in Plex.fetch_movies(sort='addedAt:desc',
-                                       container_start=0,
-                                       container_size=5):
+        for movie in Plex.fetch_movies(sort="addedAt:desc", container_start=0, container_size=5):
             added_at = Plex.normalize_added_at(movie.addedAt)
             if latest_movie and added_at <= latest_movie.created_at:
                 # break out of loop if we start to get a movie
@@ -37,7 +36,7 @@ class SyncWithPlexCommand(AbstractBaseCommand):
 
                 plex_movie.created_at = added_at
                 plex_movie.save()
-                print(f'Created PlexMovie: {plex_movie}')
+                print(f"Created PlexMovie: {plex_movie}")
             except Exception as e:
                 logger.exception(f"Failed to create PlexMovie: {movie}")
                 logger.exception(e)

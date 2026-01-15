@@ -1,9 +1,6 @@
-from typing import Optional
-
 import discord
 from aiohttp import ClientSession
 from discord import app_commands
-
 from discordbot.bacon import bacon
 from discordbot.get_random import get_random
 from discordbot.request_movie import request_movie, search_tmdb
@@ -13,11 +10,13 @@ from movie_requests.commands import RequestMovieForm, RequestOmbiMovieCommand
 
 
 class OscarrBot(discord.Client):
+    web_client: ClientSession
+
     def __init__(
-            self,
-            *args,
-            web_client: ClientSession,
-            intents: Optional[discord.Intents] = None,
+        self,
+        *args,
+        web_client: ClientSession,
+        intents: discord.Intents | None = None,
     ):
         """Client initialization."""
         if intents is None:
@@ -30,7 +29,7 @@ class OscarrBot(discord.Client):
 
     async def on_ready(self):
         await self.wait_until_ready()
-        print(f'Logged on as {self.user}!')
+        print(f"Logged on as {self.user}!")
 
     async def on_interaction(self, interaction: discord.Interaction):
         try:
@@ -38,14 +37,20 @@ class OscarrBot(discord.Client):
             print(f"interaction type: {interaction.type}")
             # FIXME - put this logic in its own function
             if interaction.type == discord.InteractionType.component:
-                custom_id = interaction.data['custom_id']
+                if not interaction.data:
+                    return
+                custom_id = interaction.data.get("custom_id")
+                if not custom_id:
+                    return
                 if custom_id.startswith("tmdb_"):
                     await interaction.response.send_message("Working on it...")
                     tmdb_id = custom_id.split("_")[1]
-                    form = RequestMovieForm({
-                        'tmdb_id': tmdb_id,
-                        'discord_username': interaction.user.name,
-                    })
+                    form = RequestMovieForm(
+                        {
+                            "tmdb_id": tmdb_id,
+                            "discord_username": interaction.user.name,
+                        }
+                    )
                     ok, message = await RequestOmbiMovieCommand(form, self.web_client).execute()
                     if not ok:
                         print(f"failed to request movie: {message}")
@@ -65,7 +70,7 @@ class OscarrBot(discord.Client):
         pass
 
     async def setup_hook(self) -> None:
-        print('setup hook')
+        print("setup hook")
         self.tree.add_command(bacon)
         self.tree.add_command(genre_pie)
         self.tree.add_command(get_random)

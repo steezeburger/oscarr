@@ -1,7 +1,7 @@
 from asgiref.sync import sync_to_async
+from common.repositories.base_repository import BaseRepository
 from django.db.models import Q
 
-from common.repositories.base_repository import BaseRepository
 from plex.models import PlexMovie
 
 
@@ -15,12 +15,12 @@ class PlexMovieRepository(BaseRepository):
 
     @classmethod
     def get_random(cls):
-        plex_movie = cls.model.objects.order_by('?').first()
+        plex_movie = cls.model.objects.order_by("?").first()
         return plex_movie
 
     @classmethod
     def get_latest(cls):
-        plex_movie = cls.model.objects.order_by('-created_at').first()
+        plex_movie = cls.model.objects.order_by("-created_at").first()
         return plex_movie
 
     @classmethod
@@ -32,9 +32,8 @@ class PlexMovieRepository(BaseRepository):
     def get_or_create(cls, data: dict):
         plex_movie = None
 
-        if 'plex_guid' in data:
-            qs = cls.model.objects.filter(
-                plex_guid=data['plex_guid'])
+        if "plex_guid" in data:
+            qs = cls.model.objects.filter(plex_guid=data["plex_guid"])
             if qs:
                 plex_movie = qs.first()
 
@@ -44,14 +43,7 @@ class PlexMovieRepository(BaseRepository):
         return plex_movie
 
     @classmethod
-    def search(
-            cls,
-            *,
-            title=None,
-            actor=None,
-            director=None,
-            producer=None,
-            writer=None):
+    def search(cls, *, title=None, actor=None, director=None, producer=None, writer=None):
         movies = cls.model.objects.all()
 
         if title:
@@ -76,11 +68,12 @@ class PlexMovieRepository(BaseRepository):
     @classmethod
     def search_all(cls, keyword):
         movies = cls.model.objects.filter(
-            Q(title__icontains=keyword) |
-            Q(actors__icontains=keyword) |
-            Q(directors__icontains=keyword) |
-            Q(producers__icontains=keyword) |
-            Q(writers__icontains=keyword))
+            Q(title__icontains=keyword)
+            | Q(actors__icontains=keyword)  # type: ignore[operator]
+            | Q(directors__icontains=keyword)
+            | Q(producers__icontains=keyword)
+            | Q(writers__icontains=keyword)
+        )
 
         values = movies.values()
 

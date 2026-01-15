@@ -1,24 +1,21 @@
 import discord
 from asgiref.sync import sync_to_async
 from discord import app_commands
-
 from plex.repositories import PlexMovieRepository
 
 
-@app_commands.command(name="search_plex",
-                      description="Search for movies by title, actor, etc.")
+@app_commands.command(name="search_plex", description="Search for movies by title, actor, etc.")
 async def search(
-        interaction: discord.Interaction,
-        all: str = None,
-        title: str = None,
-        actor: str = None,
-        director: str = None,
-        producer: str = None,
-        writer: str = None,
+    interaction: discord.Interaction,
+    all: str | None = None,
+    title: str | None = None,
+    actor: str | None = None,
+    director: str | None = None,
+    producer: str | None = None,
+    writer: str | None = None,
 ):
     if all:
-        movies = await sync_to_async(list)(
-            PlexMovieRepository.search_all(all))
+        movies = await sync_to_async(list)(PlexMovieRepository.search_all(all))
     else:
         movies = await sync_to_async(list)(
             PlexMovieRepository.search(
@@ -26,7 +23,9 @@ async def search(
                 actor=actor,
                 director=director,
                 producer=producer,
-                writer=writer, ))
+                writer=writer,
+            )
+        )
 
     messages = [f"{movie['title']} ({movie['year']}) \n" for movie in movies]
     message = "".join(messages)
@@ -36,4 +35,4 @@ async def search(
         message = prepend + message
         await interaction.response.send_message(f"```{message}```")
     else:
-        await interaction.response.send_message(f"No movies found.")
+        await interaction.response.send_message("No movies found.")

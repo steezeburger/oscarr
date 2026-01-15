@@ -1,10 +1,11 @@
 from django.db import models
+from django.db.models import query
 from django.utils.timezone import now
 
 
-class SoftDeleteQuerySet(models.query.QuerySet):
+class SoftDeleteQuerySet(query.QuerySet):
     def delete(self, *args, **kwargs):
-        if kwargs.get('force_delete', None):
+        if kwargs.get("force_delete", None):
             return super().delete()
 
         return super().update(is_active=False, deleted_at=now())

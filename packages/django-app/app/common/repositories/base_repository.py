@@ -1,6 +1,6 @@
 from common.models.soft_delete_timestamp_mixin import SoftDeleteTimestampMixin
 
-NOT_IMPLEMENTED_ERROR_MESSAGE = 'You must define a `model` on the inheriting Repository'
+NOT_IMPLEMENTED_ERROR_MESSAGE = "You must define a `model` on the inheriting Repository"
 
 
 class BaseRepository:

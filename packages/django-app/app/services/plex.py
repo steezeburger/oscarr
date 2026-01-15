@@ -1,5 +1,5 @@
 import logging
-from datetime import timezone
+from datetime import UTC
 
 from django.conf import settings
 from plexapi.myplex import MyPlexAccount
@@ -34,14 +34,10 @@ class Plex:
         Get the Movies library section from the Plex server.
         """
         server = cls.get_server()
-        return server.library.section('Movies')
+        return server.library.section("Movies")
 
     @classmethod
-    def fetch_movies(
-            cls,
-            sort='addedAt:desc',
-            container_start=0,
-            container_size=5):
+    def fetch_movies(cls, sort="addedAt:desc", container_start=0, container_size=5):
         """
         Fetch movies from the Plex library with pagination and sorting.
 
@@ -55,9 +51,7 @@ class Plex:
         """
         movies_section = cls.get_movies_section()
         return movies_section.all(
-            sort=sort,
-            container_start=container_start,
-            container_size=container_size
+            sort=sort, container_start=container_start, container_size=container_size
         )
 
     @classmethod
@@ -72,15 +66,15 @@ class Plex:
             Dictionary containing movie details
         """
         return {
-            'plex_guid': movie.guid,
-            'title': movie.title,
-            'year': movie.year,
-            'duration': movie.duration,
-            'actors': [t.tag for t in movie.actors],
-            'genres': [t.tag for t in movie.genres],
-            'directors': [t.tag for t in movie.directors],
-            'producers': [t.tag for t in movie.producers],
-            'writers': [t.tag for t in movie.writers],
+            "plex_guid": movie.guid,
+            "title": movie.title,
+            "year": movie.year,
+            "duration": movie.duration,
+            "actors": [t.tag for t in movie.actors],
+            "genres": [t.tag for t in movie.genres],
+            "directors": [t.tag for t in movie.directors],
+            "producers": [t.tag for t in movie.producers],
+            "writers": [t.tag for t in movie.writers],
         }
 
     @staticmethod
@@ -94,4 +88,4 @@ class Plex:
         Returns:
             datetime with UTC timezone
         """
-        return added_at.replace(tzinfo=timezone.utc)
+        return added_at.replace(tzinfo=UTC)

@@ -11,34 +11,31 @@ class TestUserRepository(TestCase):
 
     def test_should_create_user(self):
         user_details = {
-            'nickname': '_The Architect_',
-            'discord_username': 'steezeburger',
+            "nickname": "_The Architect_",
+            "discord_username": "steezeburger",
         }
 
         user = UserRepository.get_or_create(data=user_details)
 
-        self.assertEqual(user_details['nickname'], user.nickname)
-        self.assertEqual(
-            user_details['discord_username'],
-            user.discord_username)
+        self.assertEqual(user_details["nickname"], user.nickname)
+        self.assertEqual(user_details["discord_username"], user.discord_username)
 
     def test_should_create_user_set_nickname_as_discord_username(self):
         user_details = {
-            'discord_username': 'steezeburger',
+            "discord_username": "steezeburger",
         }
 
         user = UserRepository.get_or_create(data=user_details)
 
-        self.assertEqual(user_details['nickname'], user.discord_username)
+        self.assertEqual(user_details["nickname"], user.discord_username)
 
     def test_should_get_existing_user(self):
         user = UserFactory()
 
         user_details = {
-            'nickname': user.nickname,
-            'discord_username': user.discord_username,
+            "nickname": user.nickname,
+            "discord_username": user.discord_username,
         }
-        obj_from_db = UserRepository.get_or_create(
-            data=user_details)
+        obj_from_db = UserRepository.get_or_create(data=user_details)
 
         self.assertEqual(user.pk, obj_from_db.pk)

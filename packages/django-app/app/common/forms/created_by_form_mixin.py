@@ -1,7 +1,6 @@
-from django import forms
-
 from common.forms.base_form import BaseForm
-from core.repositories import UserRepository, AccountRepository
+from core.repositories.user_repository import UserRepository
+from django import forms
 
 
 class CreatedByFormMixin(BaseForm):
@@ -12,5 +11,5 @@ class CreatedByFormMixin(BaseForm):
 
         # created_by is not required when updating
         form_name = type(self).__name__
-        if form_name.startswith('Update'):
-            self.fields['created_by'].required = False
+        if form_name.startswith("Update"):
+            self.fields["created_by"].required = False

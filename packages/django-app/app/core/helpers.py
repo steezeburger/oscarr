@@ -13,19 +13,19 @@ def generate_email_activation_code():
     Generate Email Activation Token to be sent for mobile devices
     example: ZSDF123
     """
-    token = ''.join(random.choice(string.ascii_uppercase) for i in range(4))
+    token = "".join(random.choice(string.ascii_uppercase) for i in range(4))
     return token + str(random.randint(111, 999))
 
 
 def get_random_password():
     letters = string.ascii_letters + string.punctuation
-    result_str = 'A1!' + ''.join(random.choice(letters) for i in range(10))
+    result_str = "A1!" + "".join(random.choice(letters) for i in range(10))
     return result_str
 
 
 def generate_signup_key():
     letters = string.ascii_uppercase + string.digits
-    res = ''.join(random.choice(letters) for i in range(10))
+    res = "".join(random.choice(letters) for i in range(10))
     return res
 
 
@@ -43,4 +43,4 @@ def rgetattr(obj, attr, *args):
             return getattr(obj, attr, *args)
         return None
 
-    return functools.reduce(_getattr, [obj] + attr.split('.'))
+    return functools.reduce(_getattr, [obj] + attr.split("."))

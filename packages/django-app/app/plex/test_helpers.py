@@ -1,18 +1,17 @@
-import factory
-
+from factory import Faker  # type: ignore[attr-defined]
 from factory.django import DjangoModelFactory
 
 from plex.models import PlexMovie
 
 
 class PlexMovieFactory(DjangoModelFactory):
-    plex_guid = factory.Faker('uuid4')
+    plex_guid = Faker("uuid4")
 
-    title = factory.Faker('bs')
+    title = Faker("bs")
 
-    year = factory.Faker('year')
+    year = Faker("year")
 
-    duration = factory.Faker('unix_time')
+    duration = Faker("unix_time")
 
     class Meta:
         model = PlexMovie

@@ -1,17 +1,18 @@
 import logging
-from typing import List
+from typing import TYPE_CHECKING
 
 import discord
 from discord import app_commands
-
 from movie_requests.commands import RequestMovieForm, RequestOmbiMovieCommand
 from services.tmdb import TMDB
+
+if TYPE_CHECKING:
+    from discordbot.bot import OscarrBot
 
 logger = logging.getLogger(__name__)
 
 
-@app_commands.command(name="request",
-                      description="Request a movie from the plex with a TMDB link.")
+@app_commands.command(name="request", description="Request a movie from the plex with a TMDB link.")
 async def request_movie(interaction: discord.Interaction, tmdb_id: str):
     await interaction.response.send_message("Working on it...")
 
@@ -21,12 +22,16 @@ async def request_movie(interaction: discord.Interaction, tmdb_id: str):
     print(f"username: {username}")
 
     # Get the session from the bot client
-    session = interaction.client.web_client
+    bot = interaction.client
+    assert isinstance(bot, OscarrBot)
+    session = bot.web_client
 
-    form = RequestMovieForm({
-        'tmdb_id': tmdb_id,
-        'discord_username': username,
-    })
+    form = RequestMovieForm(
+        {
+            "tmdb_id": tmdb_id,
+            "discord_username": username,
+        }
+    )
     ok, message = await RequestOmbiMovieCommand(form, session).execute()
 
     if not ok:
@@ -40,17 +45,17 @@ async def request_movie(interaction: discord.Interaction, tmdb_id: str):
 def format_for_discord(data) -> str:
     message = "🎬 **Movie/Show List** 🎬\n\n"
 
-    for item in data['results'][0:3]:
-        title = item.get('title', 'No Title')
-        release_date = item.get('release_date', 'Unknown Release Date')
+    for item in data["results"][0:3]:
+        title = item.get("title", "No Title")
+        release_date = item.get("release_date", "Unknown Release Date")
 
         message += f"**Title**: {title}\n"
         message += f"**ID**: {item['id']}\n"
         message += f"**Release Date**: {release_date}\n"
         message += "\n"
         # only include image for first result
-        if item == data['results'][0]:
-            message += TMDB.get_poster_full_path(item.get('poster_path'))
+        if item == data["results"][0]:
+            message += TMDB.get_poster_full_path(item.get("poster_path"))
             message += "\n"
 
     # message += f"Page {data['page']} of {data['total_pages']}\n"
@@ -61,12 +66,12 @@ def format_for_discord(data) -> str:
 
 def create_discord_embed(item):
     embed = discord.Embed(
-        title="🎬 Top 3 Movies/Shows 🎬",
-        color=0x1a1a1a)  # You can change the color
-    title = item.get('title', 'No Title')
-    release_date = item.get('release_date', 'Unknown Release Date')
-    tmdb_id = item.get('id', 'Unknown ID')
-    overview = item.get('overview', 'No Overview')
+        title="🎬 Top 3 Movies/Shows 🎬", color=0x1A1A1A
+    )  # You can change the color
+    title = item.get("title", "No Title")
+    release_date = item.get("release_date", "Unknown Release Date")
+    tmdb_id = item.get("id", "Unknown ID")
+    overview = item.get("overview", "No Overview")
 
     if len(overview) > 320:
         overview = overview[:320] + "..."
@@ -74,9 +79,10 @@ def create_discord_embed(item):
     embed.add_field(
         name=title,
         value=f"**Release Date**: {release_date}\n **ID**: {tmdb_id}\n **Overview**: {overview}\n",
-        inline=False)
+        inline=False,
+    )
 
-    first_poster_path = item.get('poster_path', None)
+    first_poster_path = item.get("poster_path", None)
     if first_poster_path:
         first_poster_url = f"https://image.tmdb.org/t/p/original{first_poster_path}"
         embed.set_image(url=first_poster_url)
@@ -84,12 +90,12 @@ def create_discord_embed(item):
     return embed
 
 
-def create_buttons(data) -> List[discord.ui.Button]:
+def create_buttons(data) -> list[discord.ui.Button]:
     buttons = []
-    for item in data['results'][:3]:
-        tmdb_id = item.get('id', None)
+    for item in data["results"][:3]:
+        tmdb_id = item.get("id", None)
         if tmdb_id:
-            title = item['title']
+            title = item["title"]
             # Discord button labels must be 80 characters or fewer
             # "Request " is 8 characters, leaving 72 for the title
             # If truncated, add "..." (leaving 69 chars for title + 3 for
@@ -101,25 +107,28 @@ def create_buttons(data) -> List[discord.ui.Button]:
             button = discord.ui.Button(
                 label=f"Request {title}",
                 style=discord.ButtonStyle.primary,
-                custom_id=f"tmdb_{tmdb_id}")
+                custom_id=f"tmdb_{tmdb_id}",
+            )
             buttons.append(button)
     return buttons
 
 
-@app_commands.command(name="search_tmdb",
-                      description="Search TMDB for a movie.")
+@app_commands.command(name="search_tmdb", description="Search TMDB for a movie.")
 async def search_tmdb(interaction: discord.Interaction, title: str):
     print("searching tmdb via discord bot")
 
     # Get the session from the bot client
+    from discordbot.bot import OscarrBot
+
+    assert isinstance(interaction.client, OscarrBot)
     session = interaction.client.web_client
     results = await TMDB.search_by_title(title, session)
 
-    if len(results['results']) == 0:
+    if len(results["results"]) == 0:
         await interaction.response.send_message("No results found.")
         return
 
-    embeds = [create_discord_embed(item) for item in results['results'][:3]]
+    embeds = [create_discord_embed(item) for item in results["results"][:3]]
     buttons = create_buttons(results)
 
     view = discord.ui.View()
@@ -127,9 +136,7 @@ async def search_tmdb(interaction: discord.Interaction, title: str):
         view.add_item(button)
 
     try:
-        await interaction.response.send_message(
-            embeds=embeds,
-            view=view)
+        await interaction.response.send_message(embeds=embeds, view=view)
     except Exception as e:
         print(e)
 
