@@ -3,8 +3,8 @@ import logging
 
 from aiohttp import ClientSession
 from django.core.management import BaseCommand
+from plex.enrich_movie_actors_command import EnrichMovieActorsCommand
 from plex.models import PlexMovie
-from services.actor_enrichment import ActorEnrichmentService
 
 logger = logging.getLogger(__name__)
 
@@ -88,33 +88,18 @@ class Command(BaseCommand):
         Enrich a single movie's actor data.
         """
         async with ClientSession() as session:
-            # Get current values from Django fields
-            current_actors: list[str] = movie.actors or []  # type: ignore[assignment]
-            current_tmdb_id: int | None = movie.tmdb_id  # type: ignore[assignment]
-            current_title: str = movie.title  # type: ignore[assignment]
-            current_year: int | None = movie.year  # type: ignore[assignment]
+            original_actor_count = len(movie.actors) if movie.actors else 0
 
-            original_actor_count = len(current_actors)
-
-            enriched_actors, found_tmdb_id = await ActorEnrichmentService.enrich_actors(
-                title=current_title,
-                year=current_year,
-                tmdb_id=current_tmdb_id,
-                plex_actors=current_actors,
-                session=session,
-            )
-
-            # Update the movie
-            movie.actors = enriched_actors  # type: ignore[assignment]
-            if found_tmdb_id and not current_tmdb_id:
-                movie.tmdb_id = found_tmdb_id  # type: ignore[assignment]
+            # Run the enrichment command
+            command = EnrichMovieActorsCommand(movie, session)
+            await command.execute_async()
 
             movie.save()
 
-            new_actor_count = len(enriched_actors)
+            new_actor_count = len(movie.actors) if movie.actors else 0
             self.stdout.write(
                 f"    Actors: {original_actor_count} → {new_actor_count} "
                 f"(+{new_actor_count - original_actor_count})"
             )
-            if found_tmdb_id:
-                self.stdout.write(f"    TMDB ID: {found_tmdb_id}")
+            if movie.tmdb_id:
+                self.stdout.write(f"    TMDB ID: {movie.tmdb_id}")

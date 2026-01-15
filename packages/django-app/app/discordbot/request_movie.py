@@ -122,7 +122,7 @@ async def search_tmdb(interaction: discord.Interaction, title: str):
 
     assert isinstance(interaction.client, OscarrBot)
     session = interaction.client.web_client
-    results = await TMDB.search_by_title(title, session)
+    results = await TMDB.search_movies(title, session)
 
     if len(results["results"]) == 0:
         await interaction.response.send_message("No results found.")

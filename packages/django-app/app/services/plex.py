@@ -55,26 +55,6 @@ class Plex:
         )
 
     @classmethod
-    def extract_tmdb_id(cls, movie) -> int | None:
-        """
-        Extract TMDB ID from Plex movie guids.
-
-        Args:
-            movie: Plex movie object
-
-        Returns:
-            TMDB ID as integer, or None if not found
-        """
-        try:
-            for guid in movie.guids:
-                guid_id = guid.id
-                if guid_id.startswith("tmdb://"):
-                    return int(guid_id.replace("tmdb://", ""))
-        except (AttributeError, ValueError) as e:
-            logger.warning(f"Failed to extract TMDB ID from {movie.title}: {e}")
-        return None
-
-    @classmethod
     def extract_movie_details(cls, movie) -> dict:
         """
         Extract relevant movie details from a Plex movie object.
@@ -87,7 +67,6 @@ class Plex:
         """
         return {
             "plex_guid": movie.guid,
-            "tmdb_id": cls.extract_tmdb_id(movie),
             "title": movie.title,
             "year": movie.year,
             "duration": movie.duration,

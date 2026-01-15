@@ -19,7 +19,18 @@ class TMDB:
             return await response.json()
 
     @classmethod
-    async def search_by_title(cls, title: str, session: ClientSession, year: int | None = None):
+    async def search_movies(cls, title: str, session: ClientSession, year: int | None = None):
+        """
+        Search for movies by title and optionally year.
+
+        Args:
+            title: Movie title to search for
+            session: aiohttp ClientSession
+            year: Optional release year to filter results
+
+        Returns:
+            Dictionary containing search results
+        """
         endpoint = f"{cls.base_url}/search/movie"
         params = {"api_key": settings.TMDB_TOKEN_V3, "query": title}
 
@@ -36,22 +47,22 @@ class TMDB:
             return data
 
     @classmethod
-    async def find_movie_id_by_title_and_year(
+    async def find_movie_id(
         cls, title: str, year: int | None, session: ClientSession
     ) -> int | None:
         """
-        Search for a movie by title and year, and return the TMDB ID of the best match.
+        Search for a movie and return the TMDB ID of the best match.
 
         Args:
             title: Movie title
-            year: Release year (optional)
+            year: Release year (optional but recommended for accuracy)
             session: aiohttp ClientSession
 
         Returns:
             TMDB ID of the best match, or None if no match found
         """
         try:
-            results = await cls.search_by_title(title, session, year)
+            results = await cls.search_movies(title, session, year)
             if results and results.get("results"):
                 # Return the first result (best match)
                 return results["results"][0].get("id")
