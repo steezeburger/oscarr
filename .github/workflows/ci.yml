@@ -10,6 +10,21 @@ jobs:
   quality-checks:
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: test_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
     defaults:
       run:
         working-directory: packages/django-app
@@ -42,6 +57,16 @@ jobs:
 
       - name: Run tests
         run: uv run pytest app -m "not integration" --cov=app --verbose --cov-report=term --cov-report=xml
+        env:
+          DJANGO_SECRET_KEY: "test-secret-key-for-ci-only-not-production"
+          DEBUG: "False"
+          POSTGRES_DB: "test_db"
+          POSTGRES_USER: "test_user"
+          POSTGRES_PASSWORD: "test_password"
+          POSTGRES_HOST: "localhost"
+          POSTGRES_PORT: "5432"
+          DISCORD_TOKEN: "test-discord-token"
+          PGCRYPTO_KEY: "test-pgcrypto-key-32-characters"
 
       - name: Upload coverage reports to Codecov
         if: github.event_name == 'pull_request'
