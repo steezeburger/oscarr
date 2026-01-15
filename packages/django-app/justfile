@@ -139,3 +139,5 @@ typecheck:
 # run tests locally, excluding integration tests (uses .env file)
 test:
   uv run pytest app -m "not integration" --cov=app --verbose
+
+check-all: format lint typecheck test

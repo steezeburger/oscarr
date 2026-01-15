@@ -7,7 +7,7 @@ class UserRepository(BaseRepository):
     model = User
 
     @classmethod
-    def get_by_filter(cls, filter_input: dict = None):
+    def get_by_filter(cls, filter_input: dict | None = None):
         if filter_input:
             objects = cls.get_queryset().filter(**filter_input)
         else:
@@ -36,8 +36,9 @@ class UserRepository(BaseRepository):
         return user
 
     @classmethod
-    def update(cls, *, pk=None, obj: "User" = None, data: dict) -> "User":
+    def update(cls, *, pk=None, obj: "User | None" = None, data: dict) -> "User":
         user = obj or cls.get(pk=pk)
+        assert user is not None
 
         if data.get("is_active"):
             user.is_active = data["is_active"]
@@ -49,7 +50,7 @@ class UserRepository(BaseRepository):
     def get_by_discord_username(cls, discord_username):
         try:
             user = cls.model.objects.get(discord_username=discord_username)
-        except cls.model.DoesNotExist:
+        except cls.model.DoesNotExist:  # type: ignore[attr-defined]
             return None
 
         return user

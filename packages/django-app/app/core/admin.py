@@ -40,8 +40,8 @@ class UserCreationForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if self._meta.model.USERNAME_FIELD in self.fields:
-            self.fields[self._meta.model.USERNAME_FIELD].widget.attrs["autofocus"] = True
+        if self._meta.model.USERNAME_FIELD in self.fields:  # type: ignore[attr-defined]
+            self.fields[self._meta.model.USERNAME_FIELD].widget.attrs["autofocus"] = True  # type: ignore[attr-defined]
 
     def clean_password2(self):
         password1 = self.cleaned_data.get("password1")

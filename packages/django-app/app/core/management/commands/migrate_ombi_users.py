@@ -13,7 +13,7 @@ class Command(BaseCommand):
     )
 
     def handle(self, *args, **options):
-        self.stdout.write(self.style.SUCCESS("Starting migration of Discord to Ombi UID mappings"))
+        self.stdout.write(self.style.SUCCESS("Starting migration of Discord to Ombi UID mappings"))  # type: ignore[attr-defined]
 
         # Get the uid_map from settings
         uid_map = settings.OMBI_UID_MAP
@@ -43,7 +43,7 @@ class Command(BaseCommand):
                         self.stdout.write(f"Admin user already has Ombi UID {admin_user.ombi_uid}")
                         skipped_count += 1
 
-                except User.DoesNotExist:
+                except User.DoesNotExist:  # type: ignore[attr-defined]
                     # Try finding a superuser to use
                     superuser = User.objects.filter(is_superuser=True).first()
                     if superuser:
@@ -73,7 +73,7 @@ class Command(BaseCommand):
                         migrated_count += 1
 
             except Exception as e:
-                self.stdout.write(self.style.ERROR(f"Error handling admin user: {str(e)}"))
+                self.stdout.write(self.style.ERROR(f"Error handling admin user: {str(e)}"))  # type: ignore[attr-defined]
 
         # Process all users from uid_map
         for discord_username, ombi_uid in uid_map.items():
@@ -95,7 +95,7 @@ class Command(BaseCommand):
                     )
                     skipped_count += 1
 
-            except User.DoesNotExist:
+            except User.DoesNotExist:  # type: ignore[attr-defined]
                 # Create a new user with this discord_username and ombi_uid
                 user = User.objects.create(
                     nickname=discord_username,  # Use discord username as nickname
@@ -108,7 +108,7 @@ class Command(BaseCommand):
                 migrated_count += 1
 
         self.stdout.write(
-            self.style.SUCCESS(
+            self.style.SUCCESS(  # type: ignore[attr-defined]
                 f"Migration complete! Migrated {migrated_count} users, skipped {skipped_count} users"
             )
         )

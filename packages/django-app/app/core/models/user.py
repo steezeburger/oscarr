@@ -17,8 +17,8 @@ class User(CRUDTimestampsMixin, SoftDeleteTimestampMixin, AbstractBaseUser, Perm
 
     is_staff = models.BooleanField(
         _("staff status"),
-        default=False,
-        help_text=_("Designates whether the user can log into this admin site."),
+        default=False,  # type: ignore[arg-type]
+        help_text=_("Designates whether the user can log into this admin site."),  # type: ignore[arg-type]
     )
 
     discord_username = fields.CharPGPSymmetricKeyField(
