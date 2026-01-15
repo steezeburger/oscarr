@@ -7,9 +7,23 @@ default:
 sync-with-plex:
   ./bin/dcp-django-admin.sh sync_with_plex
 
+# stops the discord bot container
+stop-discord-bot:
+  #!/usr/bin/env bash
+  CONTAINER_ID=$(docker ps -q --filter "ancestor=django-app-web" --filter "status=running" | head -1)
+  if [ -n "$CONTAINER_ID" ]; then
+    echo "Stopping discord bot container: $CONTAINER_ID"
+    docker stop $CONTAINER_ID
+  else
+    echo "No running discord bot container found"
+  fi
+
 # starts the discord bot in a container
 start-discord-bot:
   docker compose run -d --rm -w /code/app web /code/app/manage.py start_discord_bot
+
+# restart discord bot (stop then start)
+restart-discord-bot: stop-discord-bot start-discord-bot
 
 # create python venv and install dependencies
 setup-local-python-venv:
@@ -23,13 +37,14 @@ create-pgdump location=default_backups_location:
 create-json-backup location=default_backups_location:
   just dcp-dumpdata > {{location}}/`date +%Y-%m-%d_%H-%M-%S`-oscarrdump.json
 
-# pulls latest code, builds web image, migrates db, restarts web container
+# pulls latest code, builds web image, migrates db, restarts web and bot containers
 update-oscarr:
   git pull origin main
   docker compose build web
   ./bin/dcp-django-admin.sh migrate
   docker compose stop web
   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d web
+  just restart-discord-bot
 
 # create volumes, build images
 init-dcp:
