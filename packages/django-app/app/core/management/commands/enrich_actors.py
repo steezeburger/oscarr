@@ -63,7 +63,9 @@ class Command(BaseCommand):
 
         for movie in movies:
             processed += 1
-            self.stdout.write(f"[{processed}/{total_movies}] Processing: {movie.title} ({movie.year})")
+            self.stdout.write(
+                f"[{processed}/{total_movies}] Processing: {movie.title} ({movie.year})"
+            )
 
             try:
                 asyncio.run(self._enrich_movie(movie))
