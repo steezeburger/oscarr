@@ -13,6 +13,8 @@ class UserFactory(DjangoModelFactory):
 
     discord_username = factory.Faker("ssn")
 
+    ombi_uid = factory.Faker("ssn")
+
     is_active = True
     is_staff = False
 

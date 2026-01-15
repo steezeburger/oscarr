@@ -1,5 +1,5 @@
 from common.forms.base_form import BaseForm
-from core.repositories import UserRepository
+from core.repositories.user_repository import UserRepository
 from django import forms
 
 

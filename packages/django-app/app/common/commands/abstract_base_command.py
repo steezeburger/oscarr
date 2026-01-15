@@ -14,4 +14,5 @@ class AbstractBaseCommand(ABC):
     @abstractmethod
     def execute(self) -> None:
         if hasattr(self, "form") and not self.form.is_valid():
-            raise ValidationError(self.form.errors.as_json())
+            errors_json = self.form.errors.as_json() if self.form.errors else "{}"
+            raise ValidationError(errors_json)

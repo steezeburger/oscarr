@@ -17,7 +17,10 @@ class SoftDeleteTimestampMixin(models.Model):
 
     deleted_at = models.DateTimeField(db_index=True, null=True)
     is_active = models.BooleanField(
-        _("active"), db_index=True, default=True, help_text=is_active_help_text
+        _("active"),
+        db_index=True,
+        default=True,
+        help_text=str(is_active_help_text),  # type: ignore[arg-type]
     )
 
     objects = SoftDeleteModelManager()
