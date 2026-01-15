@@ -1,7 +1,6 @@
 import asyncio
 import logging
 
-from aiohttp import ClientSession
 from django.core.management import BaseCommand
 from plex.enrich_movie_actors_command import EnrichMovieActorsCommand
 from plex.models import PlexMovie
@@ -87,19 +86,18 @@ class Command(BaseCommand):
         """
         Enrich a single movie's actor data.
         """
-        async with ClientSession() as session:
-            original_actor_count = len(movie.actors) if movie.actors else 0
+        original_actor_count = len(movie.actors) if movie.actors else 0
 
-            # Run the enrichment command
-            command = EnrichMovieActorsCommand(movie, session)
-            await command.execute()
+        # Run the enrichment command
+        command = EnrichMovieActorsCommand(movie)
+        await command.execute()
 
-            movie.save()
+        movie.save()
 
-            new_actor_count = len(movie.actors) if movie.actors else 0
-            self.stdout.write(
-                f"    Actors: {original_actor_count} → {new_actor_count} "
-                f"(+{new_actor_count - original_actor_count})"
-            )
-            if movie.tmdb_id:
-                self.stdout.write(f"    TMDB ID: {movie.tmdb_id}")
+        new_actor_count = len(movie.actors) if movie.actors else 0
+        self.stdout.write(
+            f"    Actors: {original_actor_count} → {new_actor_count} "
+            f"(+{new_actor_count - original_actor_count})"
+        )
+        if movie.tmdb_id:
+            self.stdout.write(f"    TMDB ID: {movie.tmdb_id}")

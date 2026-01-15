@@ -1,7 +1,6 @@
 import asyncio
 import logging
 
-from aiohttp import ClientSession
 from common.commands.abstract_base_command import AbstractBaseCommand
 from services.plex import Plex
 
@@ -21,25 +20,10 @@ class SyncWithPlexCommand(AbstractBaseCommand):
     by addedAt, so we have to get a page of movies.
     """
 
-    async def _enrich_movie_actors(self, plex_movie, session: ClientSession):
-        """
-        Enrich a movie's actor list with data from TMDB.
-
-        Args:
-            plex_movie: PlexMovie instance to enrich
-            session: aiohttp ClientSession
-        """
-        command = EnrichMovieActorsCommand(plex_movie, session)
-        await command.execute()
-
     def execute(self) -> None:
         super().execute()
 
         latest_movie = PlexMovieRepository.get_latest()
-
-        async def enrich_with_session(plex_movie):
-            async with ClientSession() as session:
-                await self._enrich_movie_actors(plex_movie, session)
 
         for movie in Plex.fetch_movies(sort="addedAt:desc", container_start=0, container_size=5):
             added_at = Plex.normalize_added_at(movie.addedAt)
@@ -56,7 +40,8 @@ class SyncWithPlexCommand(AbstractBaseCommand):
 
                 # Enrich actors with TMDB data
                 try:
-                    asyncio.run(enrich_with_session(plex_movie))
+                    command = EnrichMovieActorsCommand(plex_movie)
+                    asyncio.run(command.execute())
                 except Exception as e:
                     logger.warning(f"Failed to enrich actors for {plex_movie.title}: {e}")
 
