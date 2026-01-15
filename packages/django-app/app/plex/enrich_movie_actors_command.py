@@ -1,24 +1,22 @@
 import logging
 
 from aiohttp import ClientSession
-from common.commands.abstract_base_command import AbstractBaseCommand
 from services.tmdb import TMDB
 
 logger = logging.getLogger(__name__)
 
 
-class EnrichMovieActorsCommand(AbstractBaseCommand):
+class EnrichMovieActorsCommand:
     """
     Command to enrich a movie's actor list with data from TMDB.
     """
 
     def __init__(self, movie, session: ClientSession, max_actors: int = 30):
-        super().__init__()
         self.movie = movie
         self.session = session
         self.max_actors = max_actors
 
-    async def execute_async(self):
+    async def execute(self):
         """
         Execute the enrichment asynchronously.
         Updates the movie instance with enriched actors and TMDB ID.

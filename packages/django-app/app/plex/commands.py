@@ -30,7 +30,7 @@ class SyncWithPlexCommand(AbstractBaseCommand):
             session: aiohttp ClientSession
         """
         command = EnrichMovieActorsCommand(plex_movie, session)
-        await command.execute_async()
+        await command.execute()
 
     def execute(self) -> None:
         super().execute()

@@ -92,7 +92,7 @@ class Command(BaseCommand):
 
             # Run the enrichment command
             command = EnrichMovieActorsCommand(movie, session)
-            await command.execute_async()
+            await command.execute()
 
             movie.save()
 
