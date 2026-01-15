@@ -29,18 +29,24 @@ class SyncWithPlexCommand(AbstractBaseCommand):
             plex_movie: PlexMovie instance to enrich
         """
         async with ClientSession() as session:
+            # Get current values from Django fields
+            current_actors: list[str] = plex_movie.actors or []  # type: ignore[assignment]
+            current_tmdb_id: int | None = plex_movie.tmdb_id  # type: ignore[assignment]
+            current_title: str = plex_movie.title  # type: ignore[assignment]
+            current_year: int | None = plex_movie.year  # type: ignore[assignment]
+
             enriched_actors, found_tmdb_id = await ActorEnrichmentService.enrich_actors(
-                title=plex_movie.title,
-                year=plex_movie.year,
-                tmdb_id=plex_movie.tmdb_id,
-                plex_actors=plex_movie.actors or [],
+                title=current_title,
+                year=current_year,
+                tmdb_id=current_tmdb_id,
+                plex_actors=current_actors,
                 session=session,
             )
 
             # Update the movie with enriched data
-            plex_movie.actors = enriched_actors
-            if found_tmdb_id and not plex_movie.tmdb_id:
-                plex_movie.tmdb_id = found_tmdb_id
+            plex_movie.actors = enriched_actors  # type: ignore[assignment]
+            if found_tmdb_id and not current_tmdb_id:
+                plex_movie.tmdb_id = found_tmdb_id  # type: ignore[assignment]
 
     def execute(self) -> None:
         super().execute()

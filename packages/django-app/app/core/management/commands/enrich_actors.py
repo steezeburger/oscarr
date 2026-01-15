@@ -53,7 +53,7 @@ class Command(BaseCommand):
         self.stdout.write(f"Found {total_movies} movies to enrich")
 
         if total_movies == 0:
-            self.stdout.write(self.style.SUCCESS("No movies to enrich!"))
+            self.stdout.write(self.style.SUCCESS("No movies to enrich!"))  # type: ignore[attr-defined]
             return
 
         # Process movies
@@ -70,15 +70,15 @@ class Command(BaseCommand):
             try:
                 asyncio.run(self._enrich_movie(movie))
                 enriched += 1
-                self.stdout.write(self.style.SUCCESS(f"  ✓ Enriched {movie.title}"))
+                self.stdout.write(self.style.SUCCESS(f"  ✓ Enriched {movie.title}"))  # type: ignore[attr-defined]
             except Exception as e:
                 failed += 1
                 logger.exception(f"Failed to enrich {movie.title}: {e}")
-                self.stdout.write(self.style.ERROR(f"  ✗ Failed: {e}"))
+                self.stdout.write(self.style.ERROR(f"  ✗ Failed: {e}"))  # type: ignore[attr-defined]
 
         # Summary
         self.stdout.write("\n" + "=" * 50)
-        self.stdout.write(self.style.SUCCESS("Enrichment complete!"))
+        self.stdout.write(self.style.SUCCESS("Enrichment complete!"))  # type: ignore[attr-defined]
         self.stdout.write(f"  Total processed: {processed}")
         self.stdout.write(f"  Successfully enriched: {enriched}")
         self.stdout.write(f"  Failed: {failed}")
@@ -88,20 +88,26 @@ class Command(BaseCommand):
         Enrich a single movie's actor data.
         """
         async with ClientSession() as session:
-            original_actor_count = len(movie.actors or [])
+            # Get current values from Django fields
+            current_actors: list[str] = movie.actors or []  # type: ignore[assignment]
+            current_tmdb_id: int | None = movie.tmdb_id  # type: ignore[assignment]
+            current_title: str = movie.title  # type: ignore[assignment]
+            current_year: int | None = movie.year  # type: ignore[assignment]
+
+            original_actor_count = len(current_actors)
 
             enriched_actors, found_tmdb_id = await ActorEnrichmentService.enrich_actors(
-                title=movie.title,
-                year=movie.year,
-                tmdb_id=movie.tmdb_id,
-                plex_actors=movie.actors or [],
+                title=current_title,
+                year=current_year,
+                tmdb_id=current_tmdb_id,
+                plex_actors=current_actors,
                 session=session,
             )
 
             # Update the movie
-            movie.actors = enriched_actors
-            if found_tmdb_id and not movie.tmdb_id:
-                movie.tmdb_id = found_tmdb_id
+            movie.actors = enriched_actors  # type: ignore[assignment]
+            if found_tmdb_id and not current_tmdb_id:
+                movie.tmdb_id = found_tmdb_id  # type: ignore[assignment]
 
             movie.save()
 
