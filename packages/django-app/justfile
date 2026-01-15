@@ -10,13 +10,15 @@ sync-with-plex:
 # stops the discord bot container
 stop-discord-bot:
   #!/usr/bin/env bash
-  CONTAINER_ID=$(docker ps -q --filter "ancestor=django-app-web" --filter "status=running" | head -1)
-  if [ -n "$CONTAINER_ID" ]; then
-    echo "Stopping discord bot container: $CONTAINER_ID"
-    docker stop $CONTAINER_ID
-  else
-    echo "No running discord bot container found"
-  fi
+  for CONTAINER_ID in $(docker ps -q --filter "ancestor=django-app-web" --filter "status=running"); do
+    COMMAND=$(docker inspect $CONTAINER_ID | jq -r '.[0].Config.Cmd | join(" ")')
+    if echo "$COMMAND" | grep -q "start_discord_bot"; then
+      echo "Stopping discord bot container: $CONTAINER_ID"
+      docker stop $CONTAINER_ID
+      exit 0
+    fi
+  done
+  echo "No running discord bot container found"
 
 # starts the discord bot in a container
 start-discord-bot:
