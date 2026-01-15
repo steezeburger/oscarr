@@ -12,6 +12,13 @@ class PlexMovie(SoftDeleteTimestampMixin, CRUDTimestampsMixin):
 
     plex_guid = models.CharField(max_length=512, help_text=_("Plex GUID."))
 
+    tmdb_id = models.IntegerField(
+        null=True,
+        blank=True,
+        db_index=True,
+        help_text=_("TMDB ID for enriching movie data."),  # type: ignore[arg-type]
+    )
+
     title = models.CharField(max_length=255, help_text=_("The title of the movie."))
 
     year = models.SmallIntegerField(
