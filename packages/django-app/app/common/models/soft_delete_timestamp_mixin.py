@@ -19,7 +19,7 @@ class SoftDeleteTimestampMixin(models.Model):
     is_active = models.BooleanField(
         _("active"),
         db_index=True,
-        default=True,
+        default=True,  # type: ignore[arg-type]
         help_text=str(is_active_help_text),  # type: ignore[arg-type]
     )
 
