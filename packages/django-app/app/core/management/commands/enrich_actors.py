@@ -2,7 +2,8 @@ import asyncio
 import logging
 
 from django.core.management import BaseCommand
-from plex.enrich_movie_actors_command import EnrichMovieActorsCommand
+from plex.commands import EnrichMovieActorsCommand
+from plex.forms import EnrichMovieActorsForm
 from plex.models import PlexMovie
 
 logger = logging.getLogger(__name__)
@@ -88,8 +89,12 @@ class Command(BaseCommand):
         """
         original_actor_count = len(movie.actors) if movie.actors else 0
 
-        # Run the enrichment command
-        command = EnrichMovieActorsCommand(movie)
+        # Create form and run the enrichment command
+        form = EnrichMovieActorsForm({"movie": movie.id, "max_actors": 30})
+        if not form.is_valid():
+            raise ValueError(f"Invalid form data: {form.errors}")
+
+        command = EnrichMovieActorsCommand(form)
         await command.execute()
 
         movie.save()
