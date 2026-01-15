@@ -44,7 +44,7 @@ class RequestRadarrMovieCommand(AbstractBaseCommand):
         self.form = form
         self.session = session
 
-    async def execute(self) -> (bool, str):
+    async def execute(self) -> tuple[bool, str]:
         super().execute()
 
         tmdb_id = self.form.cleaned_data["tmdb_id"]
@@ -91,7 +91,7 @@ async def get_ombi_request_from_tmdb_info(tmdb_info: dict, username: str) -> dic
             if user.ombi_uid:
                 return user.ombi_uid
             return None
-        except User.DoesNotExist:
+        except User.DoesNotExist:  # type: ignore[attr-defined]
             return None
 
     # Wrap the synchronous function with sync_to_async
@@ -123,7 +123,7 @@ class RequestOmbiMovieCommand(AbstractBaseCommand):
         self.form = form
         self.session = session
 
-    async def execute(self) -> (bool, str):
+    async def execute(self) -> tuple[bool, str]:
         super().execute()
 
         tmdb_id = self.form.cleaned_data["tmdb_id"]
