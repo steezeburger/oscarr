@@ -56,7 +56,7 @@ jobs:
         run: uv run pyright app
 
       - name: Run tests
-        run: uv run pytest app -m "not integration" --cov=app --verbose --cov-report=term --cov-report=xml
+        run: uv run pytest app -m "not integration" --cov=app --verbose --cov-report=term
         env:
           DJANGO_SECRET_KEY: "test-secret-key-for-ci-only-not-production"
           DEBUG: "False"
@@ -67,12 +67,3 @@ jobs:
           POSTGRES_PORT: "5432"
           DISCORD_TOKEN: "test-discord-token"
           PGCRYPTO_KEY: "test-pgcrypto-key-32-characters"
-
-      - name: Upload coverage reports to Codecov
-        if: github.event_name == 'pull_request'
-        uses: codecov/codecov-action@v4
-        with:
-          files: packages/django-app/coverage.xml
-          flags: unittests
-          fail_ci_if_error: false
-          token: ${{ secrets.CODECOV_TOKEN }}
