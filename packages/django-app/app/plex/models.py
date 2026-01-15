@@ -15,10 +15,15 @@ class PlexMovie(SoftDeleteTimestampMixin, CRUDTimestampsMixin):
     title = models.CharField(max_length=255, help_text=_("The title of the movie."))
 
     year = models.SmallIntegerField(
-        db_index=True, null=True, blank=True, help_text=_("The year the movie was released.")
+        db_index=True,
+        null=True,
+        blank=True,
+        help_text=_("The year the movie was released."),  # type: ignore[arg-type]
     )
 
-    duration = models.BigIntegerField(help_text=_("The duration of the movie in milliseconds."))
+    duration = models.BigIntegerField(
+        help_text=_("The duration of the movie in milliseconds.")  # type: ignore[arg-type]
+    )
 
     actors = ArrayField(models.CharField(max_length=255, blank=True), null=True, blank=True)
 

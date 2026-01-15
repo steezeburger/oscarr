@@ -33,7 +33,7 @@ class PlexMovieAdmin(admin.ModelAdmin):
 
     def get_form(self, request, obj=None, **kwargs):
         form = super().get_form(request, obj, **kwargs)
-        form.base_fields["deleted_at"].required = False
+        form.base_fields["deleted_at"].required = False  # type: ignore[attr-defined]
         return form
 
     actions = ["force_delete_plex_movie"]

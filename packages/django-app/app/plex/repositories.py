@@ -69,7 +69,7 @@ class PlexMovieRepository(BaseRepository):
     def search_all(cls, keyword):
         movies = cls.model.objects.filter(
             Q(title__icontains=keyword)
-            | Q(actors__icontains=keyword)
+            | Q(actors__icontains=keyword)  # type: ignore[operator]
             | Q(directors__icontains=keyword)
             | Q(producers__icontains=keyword)
             | Q(writers__icontains=keyword)
