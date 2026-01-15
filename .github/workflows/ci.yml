@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  quality-checks:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: packages/django-app
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
+
+      - name: Install dependencies
+        run: uv sync --no-install-project
+
+      - name: Check formatting with ruff
+        run: uv run ruff format --check app
+
+      - name: Lint with ruff
+        run: uv run ruff check app
+
+      - name: Type check with pyright
+        run: uv run pyright app
+
+      - name: Run tests
+        run: uv run pytest app -m "not integration" --cov=app --verbose --cov-report=term --cov-report=xml
+
+      - name: Upload coverage reports to Codecov
+        if: github.event_name == 'pull_request'
+        uses: codecov/codecov-action@v4
+        with:
+          files: packages/django-app/coverage.xml
+          flags: unittests
+          fail_ci_if_error: false
+          token: ${{ secrets.CODECOV_TOKEN }}
