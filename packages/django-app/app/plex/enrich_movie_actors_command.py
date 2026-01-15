@@ -1,12 +1,13 @@
 import logging
 
 from aiohttp import ClientSession
+from common.commands.abstract_base_command import AbstractBaseCommand
 from services.tmdb import TMDB
 
 logger = logging.getLogger(__name__)
 
 
-class EnrichMovieActorsCommand:
+class EnrichMovieActorsCommand(AbstractBaseCommand):
     """
     Command to enrich a movie's actor list with data from TMDB.
     """
