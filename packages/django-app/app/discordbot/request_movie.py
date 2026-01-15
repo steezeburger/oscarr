@@ -1,9 +1,13 @@
 import logging
+from typing import TYPE_CHECKING
 
 import discord
 from discord import app_commands
 from movie_requests.commands import RequestMovieForm, RequestOmbiMovieCommand
 from services.tmdb import TMDB
+
+if TYPE_CHECKING:
+    from discordbot.bot import OscarrBot
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +22,9 @@ async def request_movie(interaction: discord.Interaction, tmdb_id: str):
     print(f"username: {username}")
 
     # Get the session from the bot client
-    session = interaction.client.web_client
+    bot = interaction.client
+    assert isinstance(bot, OscarrBot)
+    session = bot.web_client
 
     form = RequestMovieForm(
         {
@@ -112,6 +118,9 @@ async def search_tmdb(interaction: discord.Interaction, title: str):
     print("searching tmdb via discord bot")
 
     # Get the session from the bot client
+    from discordbot.bot import OscarrBot
+
+    assert isinstance(interaction.client, OscarrBot)
     session = interaction.client.web_client
     results = await TMDB.search_by_title(title, session)
 

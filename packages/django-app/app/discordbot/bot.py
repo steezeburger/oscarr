@@ -10,6 +10,8 @@ from movie_requests.commands import RequestMovieForm, RequestOmbiMovieCommand
 
 
 class OscarrBot(discord.Client):
+    web_client: ClientSession
+
     def __init__(
         self,
         *args,
@@ -35,7 +37,11 @@ class OscarrBot(discord.Client):
             print(f"interaction type: {interaction.type}")
             # FIXME - put this logic in its own function
             if interaction.type == discord.InteractionType.component:
-                custom_id = interaction.data["custom_id"]
+                if not interaction.data:
+                    return
+                custom_id = interaction.data.get("custom_id")
+                if not custom_id:
+                    return
                 if custom_id.startswith("tmdb_"):
                     await interaction.response.send_message("Working on it...")
                     tmdb_id = custom_id.split("_")[1]

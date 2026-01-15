@@ -7,12 +7,12 @@ from plex.repositories import PlexMovieRepository
 @app_commands.command(name="search_plex", description="Search for movies by title, actor, etc.")
 async def search(
     interaction: discord.Interaction,
-    all: str = None,
-    title: str = None,
-    actor: str = None,
-    director: str = None,
-    producer: str = None,
-    writer: str = None,
+    all: str | None = None,
+    title: str | None = None,
+    actor: str | None = None,
+    director: str | None = None,
+    producer: str | None = None,
+    writer: str | None = None,
 ):
     if all:
         movies = await sync_to_async(list)(PlexMovieRepository.search_all(all))
