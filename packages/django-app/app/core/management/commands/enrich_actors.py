@@ -1,5 +1,6 @@
 import asyncio
 import logging
+from typing import cast
 
 from asgiref.sync import sync_to_async
 from django.core.management import BaseCommand
@@ -85,10 +86,10 @@ class Command(BaseCommand):
         """
         Enrich a single movie's actor data.
         """
-        original_actor_count = len(movie.actors) if movie.actors else 0
+        original_actor_count = len(cast(list[str], movie.actors)) if movie.actors else 0
 
         # Create form and run the enrichment command
-        form = EnrichMovieActorsForm({"movie": movie.id, "max_actors": 30})
+        form = EnrichMovieActorsForm({"movie": movie.pk, "max_actors": 30})
 
         # Validate form in sync context
         is_valid = await sync_to_async(lambda: form.is_valid())()
@@ -101,7 +102,7 @@ class Command(BaseCommand):
         # Refresh movie from DB since command saved it via repository
         await sync_to_async(movie.refresh_from_db)()
 
-        new_actor_count = len(movie.actors) if movie.actors else 0
+        new_actor_count = len(cast(list[str], movie.actors)) if movie.actors else 0
         self.stdout.write(
             f"    Actors: {original_actor_count} → {new_actor_count} "
             f"(+{new_actor_count - original_actor_count})"
