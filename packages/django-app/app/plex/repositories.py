@@ -1,6 +1,7 @@
 from asgiref.sync import sync_to_async
 from common.repositories.base_repository import BaseRepository
 from django.db.models import Q
+from django.utils import timezone
 
 from plex.models import PlexMovie
 
@@ -78,3 +79,71 @@ class PlexMovieRepository(BaseRepository):
         values = movies.values()
 
         return values
+
+    @classmethod
+    def get_active_movies(cls, without_enrichment=False, limit=None):
+        """
+        Get active movies, optionally filtering by actor enrichment status.
+
+        Args:
+            without_enrichment: If True, only return movies that haven't been enriched
+            limit: Maximum number of movies to return
+
+        Returns:
+            QuerySet of PlexMovie instances ordered by created_at descending
+        """
+        movies = cls.model.objects.filter(is_active=True)
+
+        if without_enrichment:
+            movies = movies.filter(actors_enriched_at__isnull=True)
+
+        movies = movies.order_by("-created_at")
+
+        if limit:
+            movies = movies[:limit]
+
+        return movies
+
+    @classmethod
+    def update_movie_actors(cls, movie, actors, tmdb_id=None):
+        """
+        Update a movie's actors list and mark as enriched.
+
+        Args:
+            movie: PlexMovie instance to update
+            actors: List of actor names
+            tmdb_id: Optional TMDB ID to set if not already present
+
+        Returns:
+            Updated PlexMovie instance
+        """
+        movie.actors = actors
+        movie.actors_enriched_at = timezone.now()
+
+        if tmdb_id and not movie.tmdb_id:
+            movie.tmdb_id = tmdb_id
+
+        movie.save()
+        return movie
+
+    @classmethod
+    async def update_movie_actors_async(cls, movie, actors, tmdb_id=None):
+        """
+        Async version of update_movie_actors.
+
+        Args:
+            movie: PlexMovie instance to update
+            actors: List of actor names
+            tmdb_id: Optional TMDB ID to set if not already present
+
+        Returns:
+            Updated PlexMovie instance
+        """
+        movie.actors = actors
+        movie.actors_enriched_at = timezone.now()
+
+        if tmdb_id and not movie.tmdb_id:
+            movie.tmdb_id = tmdb_id
+
+        await sync_to_async(movie.save)()
+        return movie
