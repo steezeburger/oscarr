@@ -34,6 +34,12 @@ class PlexMovie(SoftDeleteTimestampMixin, CRUDTimestampsMixin):
 
     actors = ArrayField(models.CharField(max_length=255, blank=True), null=True, blank=True)
 
+    actors_enriched_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text=_("Timestamp when actor data was last enriched from TMDB."),  # type: ignore[arg-type]
+    )
+
     genres = ArrayField(models.CharField(max_length=255, blank=True), null=True, blank=True)
 
     directors = ArrayField(models.CharField(max_length=255, blank=True), null=True, blank=True)

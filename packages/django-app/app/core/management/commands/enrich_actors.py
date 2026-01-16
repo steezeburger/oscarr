@@ -1,10 +1,12 @@
 import asyncio
 import logging
 
+from asgiref.sync import sync_to_async
 from django.core.management import BaseCommand
 from plex.commands import EnrichMovieActorsCommand
 from plex.forms import EnrichMovieActorsForm
 from plex.models import PlexMovie
+from plex.repositories import PlexMovieRepository
 
 logger = logging.getLogger(__name__)
 
@@ -38,16 +40,11 @@ class Command(BaseCommand):
 
         # Get movies to enrich
         if enrich_all:
-            movies = PlexMovie.objects.filter(is_active=True).order_by("-created_at")
+            movies = PlexMovieRepository.get_active_movies(without_enrichment=False, limit=limit)
             self.stdout.write("Enriching all active movies...")
         else:
-            movies = PlexMovie.objects.filter(is_active=True, tmdb_id__isnull=True).order_by(
-                "-created_at"
-            )
-            self.stdout.write("Enriching movies without TMDB ID...")
-
-        if limit:
-            movies = movies[:limit]
+            movies = PlexMovieRepository.get_active_movies(without_enrichment=True, limit=limit)
+            self.stdout.write("Enriching movies without actor enrichment...")
 
         total_movies = movies.count()
         self.stdout.write(f"Found {total_movies} movies to enrich")
@@ -75,6 +72,7 @@ class Command(BaseCommand):
                 failed += 1
                 logger.exception(f"Failed to enrich {movie.title}: {e}")
                 self.stdout.write(self.style.ERROR(f"  ✗ Failed: {e}"))  # type: ignore[attr-defined]
+                continue
 
         # Summary
         self.stdout.write("\n" + "=" * 50)
@@ -91,13 +89,17 @@ class Command(BaseCommand):
 
         # Create form and run the enrichment command
         form = EnrichMovieActorsForm({"movie": movie.id, "max_actors": 30})
-        if not form.is_valid():
+
+        # Validate form in sync context
+        is_valid = await sync_to_async(lambda: form.is_valid())()
+        if not is_valid:
             raise ValueError(f"Invalid form data: {form.errors}")
 
         command = EnrichMovieActorsCommand(form)
         await command.execute()
 
-        movie.save()
+        # Refresh movie from DB since command saved it via repository
+        await sync_to_async(movie.refresh_from_db)()
 
         new_actor_count = len(movie.actors) if movie.actors else 0
         self.stdout.write(

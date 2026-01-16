@@ -52,8 +52,12 @@ class SyncWithPlexCommand(AbstractBaseCommand):
                         )
                 except Exception as e:
                     logger.warning(f"Failed to enrich actors for {plex_movie.title}: {e}")
+                    plex_movie.save()
+                else:
+                    # Only save if enrichment didn't happen (it saves itself via repository)
+                    if not plex_movie.actors_enriched_at:
+                        plex_movie.save()
 
-                plex_movie.save()
                 print(f"Created PlexMovie: {plex_movie}")
             except Exception as e:
                 logger.exception(f"Failed to create PlexMovie: {movie}")
@@ -110,10 +114,10 @@ class EnrichMovieActorsCommand(AbstractBaseCommand):
                 # Limit to max_actors
                 enriched_actors = enriched_actors[:max_actors]
 
-                # Update the movie
-                movie.actors = enriched_actors  # type: ignore[assignment]
-                if not movie.tmdb_id:
-                    movie.tmdb_id = tmdb_id  # type: ignore[assignment]
+                # Update the movie via repository
+                await PlexMovieRepository.update_movie_actors_async(
+                    movie=movie, actors=enriched_actors, tmdb_id=tmdb_id
+                )
 
                 logger.info(
                     f"Enriched {movie.title}: {len(plex_actors)} Plex + "
