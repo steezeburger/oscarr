@@ -28,13 +28,14 @@ class SyncWithPlexCommand(AbstractBaseCommand):
         super().execute()
 
         latest_movie = PlexMovieRepository.get_latest()
+        synced_count = 0
 
         for movie in Plex.fetch_movies(sort="addedAt:desc", container_start=0, container_size=5):
             added_at = Plex.normalize_added_at(movie.addedAt)
             if latest_movie and added_at <= latest_movie.created_at:
                 # break out of loop if we start to get a movie
                 # added before the latest movie in the database
-                return
+                break
 
             try:
                 movie_details = Plex.extract_movie_details(movie)
@@ -61,9 +62,21 @@ class SyncWithPlexCommand(AbstractBaseCommand):
                         plex_movie.save()
 
                 print(f"Created PlexMovie: {plex_movie}")
+                synced_count += 1
             except Exception as e:
                 logger.exception(f"Failed to create PlexMovie: {movie}")
                 logger.exception(e)
+
+        # Rebuild actor graph cache after syncing
+        if synced_count > 0:
+            logger.info(f"Synced {synced_count} movies, rebuilding actor graph cache...")
+            try:
+                command = BuildActorGraphCommand()
+                graph = asyncio.run(command.execute())
+                CachedGraphRepository.save_actor_graph(graph)
+                logger.info("Actor graph cache rebuilt successfully")
+            except Exception as e:
+                logger.exception(f"Failed to rebuild actor graph cache: {e}")
 
 
 class EnrichMovieActorsCommand(AbstractBaseCommand):
