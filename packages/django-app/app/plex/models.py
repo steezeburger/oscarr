@@ -75,7 +75,8 @@ class CachedGraph(models.Model):
     )
 
     updated_at = models.DateTimeField(
-        auto_now=True, help_text=_("Timestamp of last cache update")  # type: ignore[arg-type]
+        auto_now=True,
+        help_text=_("Timestamp of last cache update"),  # type: ignore[arg-type]
     )
 
     class Meta:

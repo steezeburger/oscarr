@@ -1,9 +1,43 @@
 import discord
 import networkx as nx
-import pandas as pd
 from asgiref.sync import sync_to_async
 from discord import app_commands
 from plex.models import PlexMovie
+from plex.repositories import CachedGraphRepository
+
+
+async def build_actor_graph():
+    """
+    Build a NetworkX graph of all movies and their associated people.
+    Includes actors, directors, producers, and writers.
+
+    Returns:
+        nx.Graph: Complete graph of all movie-person relationships
+    """
+    movies = await sync_to_async(list)(PlexMovie.objects.all().values())
+
+    graph = nx.Graph()
+    added_people = set()
+
+    for movie_dict in movies:
+        # Add movie node
+        year = movie_dict.get("year")
+        year = int(year) if year and year > 0 else None
+        year_string = f" ({year})" if year else ""
+        movie_title = f"{movie_dict['title']}{year_string}"
+        graph.add_node(movie_title, type="movie")
+
+        # Add all people (actors, directors, producers, writers)
+        for person_type in ["actors", "directors", "producers", "writers"]:
+            people = movie_dict.get(person_type) or []
+            for person in people:
+                person_lower = person.lower()
+                if person_lower not in added_people:
+                    graph.add_node(person_lower, type="person")
+                    added_people.add(person_lower)
+                graph.add_edge(movie_title, person_lower)
+
+    return graph
 
 
 @app_commands.command(name="bacon", description="Shows hops between actors.")
@@ -16,80 +50,33 @@ async def bacon(
     with_producers: bool = False,
     with_writers: bool = False,
 ):
-    # munge input
+    """Find the shortest path between two people through movies."""
+    # Normalize input
     from_actor = from_actor.strip().lower()
     to_actor = to_actor.strip().lower()
 
-    movies = await sync_to_async(list)(PlexMovie.objects.all().values())
-    df = pd.DataFrame(movies)
+    # Defer response since this might take a moment
+    await interaction.response.defer()
 
-    graph = nx.Graph()
-    added_actors = []
-    added_directors = []
-    added_producers = []
-    added_writers = []
+    # Try to load cached graph
+    graph = await CachedGraphRepository.load_actor_graph_async()
 
-    def add_movie_and_actors_to_graph(movie):
-        year = int(movie.year) if movie.year > 0 else None
-        year_string = f" ({year})" if year else None
-        movie_title = f"{movie.title}{year_string}"
-        graph.add_node(movie_title, type="movie", color="red")
-
-        for actor in movie.actors:
-            if actor not in added_actors:
-                actor = actor.lower()
-                graph.add_node(
-                    actor, type="actor", color="blue" if actor == from_actor else "green"
-                )
-                added_actors.append(actor)
-            graph.add_edge(movie_title, actor)
-
-        if with_directors:
-            for director in movie.directors:
-                if director not in added_directors:
-                    director = director.lower()
-                    graph.add_node(
-                        director,
-                        type="directors",
-                        color="yellow" if director == from_actor else "green",
-                    )
-                    added_directors.append(director)
-                graph.add_edge(movie_title, director)
-
-        if with_producers:
-            for producer in movie.producers:
-                if producer not in added_producers:
-                    producer = producer.lower()
-                    graph.add_node(
-                        producer,
-                        type="producers",
-                        color="purple" if producer == from_actor else "green",
-                    )
-                    added_producers.append(producer)
-                graph.add_edge(movie_title, producer)
-
-        if with_writers:
-            for writer in movie.writers:
-                if writer not in added_writers:
-                    writer = writer.lower()
-                    graph.add_node(
-                        writer, type="writers", color="red" if writer == from_actor else "green"
-                    )
-                    added_writers.append(writer)
-                graph.add_edge(movie_title, writer)
-
-    _ = df.apply(lambda m: add_movie_and_actors_to_graph(m), axis=1)
+    if graph is None:
+        # Build graph if not cached
+        graph = await build_actor_graph()
+        # Cache it for next time
+        await sync_to_async(CachedGraphRepository.save_actor_graph)(graph)
 
     try:
         path = nx.shortest_path(graph, source=from_actor, target=to_actor)
 
-        # build message
+        # Build message
         words_list = []
         hops = 0
 
         for idx, entry in enumerate(path):
             if idx == 0:
-                # from actor
+                # from person
                 words_list.append(entry.title())
                 words_list.append("worked on")
             elif idx % 2 != 0:
@@ -98,20 +85,18 @@ async def bacon(
                 words_list.append(entry)
                 words_list.append("with")
             elif idx % 2 == 0 and idx != len(path) - 1:
-                # an actor
+                # an intermediary person
                 words_list.append(entry.title())
                 words_list.append("who worked on")
             elif idx == len(path) - 1:
-                # last actor
+                # target person
                 words_list.append(f"{entry.title()}.")
 
         message = f"{from_actor} and {to_actor} are connected by {hops} hops.\n" + " ".join(
             words_list
         )
-        await interaction.response.send_message(message)
-    except nx.NetworkXNoPath as exception:
-        await interaction.response.send_message(exception)
-    except nx.NodeNotFound as exception:
-        await interaction.response.send_message(exception)
-
-    await interaction.response.send_message("gonna queue up something good!")
+        await interaction.followup.send(message)
+    except nx.NetworkXNoPath:
+        await interaction.followup.send(f"No path found between {from_actor} and {to_actor}.")
+    except nx.NodeNotFound as e:
+        await interaction.followup.send(f"Person not found: {str(e)}")
