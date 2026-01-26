@@ -171,7 +171,7 @@ class CachedGraphRepository(BaseRepository):
             CachedGraph instance
         """
         graph_data = pickle.dumps(graph)
-        cached_graph, _ = cls.model.objects.update_or_create(
+        cached_graph, _ = cls.model.objects.update_or_create(  # type: ignore[attr-defined]
             key="actor_graph", defaults={"data": graph_data}
         )
         return cached_graph
@@ -185,9 +185,9 @@ class CachedGraphRepository(BaseRepository):
             NetworkX Graph object if found, None otherwise
         """
         try:
-            cached = cls.model.objects.get(key="actor_graph")
+            cached = cls.model.objects.get(key="actor_graph")  # type: ignore[attr-defined]
             return pickle.loads(cached.data)
-        except cls.model.DoesNotExist:
+        except cls.model.DoesNotExist:  # type: ignore[attr-defined]
             return None
 
     @classmethod
