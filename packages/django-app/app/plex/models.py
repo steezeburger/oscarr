@@ -55,3 +55,32 @@ class PlexMovie(SoftDeleteTimestampMixin, CRUDTimestampsMixin):
 
     def __str__(self):
         return f"{self.title} ({self.year})"
+
+
+class CachedGraph(models.Model):
+    """
+    Model for storing pickled NetworkX graphs in the database.
+    Generic storage for any graph type (actor, producer, director, etc.).
+    """
+
+    key = models.CharField(
+        max_length=255,
+        unique=True,
+        primary_key=True,
+        help_text=_("Unique identifier for the cached graph (e.g., 'actor_graph')"),  # type: ignore[arg-type]
+    )
+
+    data = models.BinaryField(
+        help_text=_("Pickled graph data stored as binary")  # type: ignore[arg-type]
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True, help_text=_("Timestamp of last cache update")  # type: ignore[arg-type]
+    )
+
+    class Meta:
+        db_table = "cached_graphs"
+        default_permissions = ()
+
+    def __str__(self):
+        return f"CachedGraph: {self.key}"
