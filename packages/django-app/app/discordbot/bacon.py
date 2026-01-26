@@ -1,43 +1,7 @@
 import discord
 import networkx as nx
-from asgiref.sync import sync_to_async
 from discord import app_commands
-from plex.models import PlexMovie
-from plex.repositories import CachedGraphRepository
-
-
-async def build_actor_graph():
-    """
-    Build a NetworkX graph of all movies and their associated people.
-    Includes actors, directors, producers, and writers.
-
-    Returns:
-        nx.Graph: Complete graph of all movie-person relationships
-    """
-    movies = await sync_to_async(list)(PlexMovie.objects.all().values())
-
-    graph = nx.Graph()
-    added_people = set()
-
-    for movie_dict in movies:
-        # Add movie node
-        year = movie_dict.get("year")
-        year = int(year) if year and year > 0 else None
-        year_string = f" ({year})" if year else ""
-        movie_title = f"{movie_dict['title']}{year_string}"
-        graph.add_node(movie_title, type="movie")
-
-        # Add all people (actors, directors, producers, writers)
-        for person_type in ["actors", "directors", "producers", "writers"]:
-            people = movie_dict.get(person_type) or []
-            for person in people:
-                person_lower = person.lower()
-                if person_lower not in added_people:
-                    graph.add_node(person_lower, type="person")
-                    added_people.add(person_lower)
-                graph.add_edge(movie_title, person_lower)
-
-    return graph
+from plex.commands import GetActorGraphCommand
 
 
 @app_commands.command(name="bacon", description="Shows hops between actors.")
@@ -58,14 +22,9 @@ async def bacon(
     # Defer response since this might take a moment
     await interaction.response.defer()
 
-    # Try to load cached graph
-    graph = await CachedGraphRepository.load_actor_graph_async()
-
-    if graph is None:
-        # Build graph if not cached
-        graph = await build_actor_graph()
-        # Cache it for next time
-        await sync_to_async(CachedGraphRepository.save_actor_graph)(graph)
+    # Get actor graph (from cache or build if needed)
+    command = GetActorGraphCommand()
+    graph = await command.execute()
 
     try:
         path = nx.shortest_path(graph, source=from_actor, target=to_actor)
