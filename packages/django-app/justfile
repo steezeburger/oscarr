@@ -7,6 +7,11 @@ default:
 copy-env:
   test -f .env || cp .env.template .env
 
+# install crontab.txt as the active crontab (replaces existing entries)
+install-crontab:
+  crontab crontab.txt
+  @echo "installed:" && crontab -l
+
 # calls sync_with_plex django management command in the container
 sync-with-plex:
   ./bin/dcp-django-admin.sh sync_with_plex
