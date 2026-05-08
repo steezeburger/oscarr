@@ -1,3 +1,5 @@
+name: oscarr
+
 volumes:
   oscarr_postgres:
     external: true
