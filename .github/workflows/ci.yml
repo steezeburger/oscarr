@@ -54,10 +54,13 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Prepare .env for CI
+      - name: Copy environment file
+        working-directory: ./packages/django-app
+        run: just copy-env
+
+      - name: Generate secret key
         working-directory: ./packages/django-app
         run: |
-          just copy-env
           SECRET_KEY=$(python3 -c 'import secrets, string; chars = string.ascii_letters + string.digits + "!@#$%^&*(-_=+)"; print("".join(secrets.choice(chars) for _ in range(50)))')
           sed -i "s|SECRET_KEY_GOES_HERE|${SECRET_KEY}|" .env
           sed -i "s|^DISCORD_TOKEN=.*|DISCORD_TOKEN=ci-test-token|" .env
@@ -75,10 +78,13 @@ jobs:
             web.cache-from=type=gha
             web.cache-to=type=gha,mode=max
 
-      - name: Create volumes and bring up db
+      - name: Create volumes
+        working-directory: ./packages/django-app
+        run: docker volume create --name=oscarr_postgres
+
+      - name: Start database
         working-directory: ./packages/django-app
         run: |
-          docker volume create --name=oscarr_postgres
           docker compose up -d db
           ./bin/wait-for-it.sh localhost:5432 -- echo "db is up"
 
