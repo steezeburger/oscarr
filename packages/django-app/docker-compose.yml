@@ -38,3 +38,27 @@ services:
       - "127.0.0.1:8000:8000"
     depends_on:
       - db
+  bot:
+    profiles: ["bot"]
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - ./.env
+    environment:
+      - POSTGRES_HOST=db
+      - LOGS_DIR=/logs
+    working_dir: /code/app
+    command:
+      - '/code/bin/wait-for-it.sh'
+      - 'db:5432'
+      - '--'
+      - 'python'
+      - '/code/app/manage.py'
+      - 'start_discord_bot'
+    volumes:
+      - .:/code
+      - ./logs:/logs
+    depends_on:
+      - db
+    restart: unless-stopped
