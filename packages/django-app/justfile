@@ -7,10 +7,6 @@ default:
 sync-with-plex:
   ./bin/dcp-django-admin.sh sync_with_plex
 
-# stops the discord bot container
-stop-discord-bot:
-  docker compose --profile bot stop bot
-
 # starts the discord bot in a container (auto-restarts unless stopped)
 start-discord-bot:
   docker compose --profile bot up -d bot
