@@ -1,4 +1,4 @@
-name: CI
+name: Lint and Test
 
 on:
   push:
@@ -6,64 +6,90 @@ on:
   pull_request:
     branches: [main]
 
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  quality-checks:
+  ci:
     runs-on: ubuntu-latest
-
-    services:
-      postgres:
-        image: postgres:16
-        env:
-          POSTGRES_USER: test_user
-          POSTGRES_PASSWORD: test_password
-          POSTGRES_DB: test_db
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
-
-    defaults:
-      run:
-        working-directory: packages/django-app
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # --- Fast fail-first: lint + format + types (native, no Docker) ---
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: packages/django-app/uv.lock
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version-file: packages/django-app/pyproject.toml
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v4
-        with:
-          enable-cache: true
+      - name: Install Python dependencies
+        working-directory: ./packages/django-app
+        run: uv sync --frozen
 
-      - name: Install dependencies
-        run: uv sync --no-install-project
-
-      - name: Check formatting with ruff
+      - name: Check Python formatting (Ruff)
+        working-directory: ./packages/django-app
         run: uv run ruff format --check app
 
-      - name: Lint with ruff
+      - name: Lint Python code (Ruff)
+        working-directory: ./packages/django-app
         run: uv run ruff check app
 
-      - name: Type check with pyright
+      - name: Type check (Pyright)
+        working-directory: ./packages/django-app
         run: uv run pyright app
 
+      # --- Docker-based: build + migrate + django check + tests ---
+
+      - name: Install Just
+        uses: extractions/setup-just@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Prepare .env for CI
+        working-directory: ./packages/django-app
+        run: |
+          just copy-env
+          SECRET_KEY=$(python3 -c 'import secrets, string; chars = string.ascii_letters + string.digits + "!@#$%^&*(-_=+)"; print("".join(secrets.choice(chars) for _ in range(50)))')
+          sed -i "s|SECRET_KEY_GOES_HERE|${SECRET_KEY}|" .env
+          sed -i "s|^DISCORD_TOKEN=.*|DISCORD_TOKEN=ci-test-token|" .env
+          sed -i "s|^PGCRYPTO_KEY=.*|PGCRYPTO_KEY=ci-test-pgcrypto-key-32chars|" .env
+
+      - name: Build web image (with GHA layer cache)
+        uses: docker/bake-action@v5
+        with:
+          workdir: ./packages/django-app
+          files: docker-compose.yml
+          targets: web
+          load: true
+          set: |
+            web.tags=oscarr-web:latest
+            web.cache-from=type=gha
+            web.cache-to=type=gha,mode=max
+
+      - name: Create volumes and bring up db
+        working-directory: ./packages/django-app
+        run: |
+          docker volume create --name=oscarr_postgres
+          docker compose up -d db
+          ./bin/wait-for-it.sh localhost:5432 -- echo "db is up"
+
+      - name: Run migrations
+        working-directory: ./packages/django-app
+        run: just dcp-migrate
+
+      - name: Run Django system checks
+        working-directory: ./packages/django-app
+        run: ./bin/dcp-django-admin.sh check --deploy
+
       - name: Run tests
-        run: uv run pytest app -m "not integration" --cov=app --verbose --cov-report=term
-        env:
-          DJANGO_SECRET_KEY: "test-secret-key-for-ci-only-not-production"
-          DEBUG: "False"
-          POSTGRES_DB: "test_db"
-          POSTGRES_USER: "test_user"
-          POSTGRES_PASSWORD: "test_password"
-          POSTGRES_HOST: "localhost"
-          POSTGRES_PORT: "5432"
-          DISCORD_TOKEN: "test-discord-token"
-          PGCRYPTO_KEY: "test-pgcrypto-key-32-characters"
+        working-directory: ./packages/django-app
+        run: just dcp-run-tests

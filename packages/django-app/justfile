@@ -3,6 +3,10 @@ set dotenv-load
 default:
   @just --list
 
+# copy .env.template to .env if .env doesn't already exist
+copy-env:
+  test -f .env || cp .env.template .env
+
 # calls sync_with_plex django management command in the container
 sync-with-plex:
   ./bin/dcp-django-admin.sh sync_with_plex
