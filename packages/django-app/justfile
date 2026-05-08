@@ -3,29 +3,21 @@ set dotenv-load
 default:
   @just --list
 
+# copy .env.template to .env if .env doesn't already exist
+copy-env:
+  test -f .env || cp .env.template .env
+
 # calls sync_with_plex django management command in the container
 sync-with-plex:
   ./bin/dcp-django-admin.sh sync_with_plex
 
-# stops the discord bot container
-stop-discord-bot:
-  #!/usr/bin/env bash
-  for CONTAINER_ID in $(docker ps -q --filter "ancestor=django-app-web" --filter "status=running"); do
-    COMMAND=$(docker inspect $CONTAINER_ID | jq -r '.[0].Config.Cmd | join(" ")')
-    if echo "$COMMAND" | grep -q "start_discord_bot"; then
-      echo "Stopping discord bot container: $CONTAINER_ID"
-      docker stop $CONTAINER_ID
-      exit 0
-    fi
-  done
-  echo "No running discord bot container found"
-
-# starts the discord bot in a container
+# starts the discord bot in a container (auto-restarts unless stopped)
 start-discord-bot:
-  docker compose run -d --rm -w /code/app web /code/app/manage.py start_discord_bot
+  docker compose --profile bot up -d bot
 
-# restart discord bot (stop then start)
-restart-discord-bot: stop-discord-bot start-discord-bot
+# restart discord bot
+restart-discord-bot:
+  docker compose --profile bot up -d --force-recreate bot
 
 # create python venv and install dependencies
 setup-local-python-venv:
@@ -42,7 +34,7 @@ create-json-backup location=default_backups_location:
 # pulls latest code, builds web image, migrates db, restarts web and bot containers
 update-oscarr:
   git pull origin main
-  docker compose build web
+  docker compose --profile bot build web bot
   ./bin/dcp-django-admin.sh migrate
   docker compose stop web
   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d web
