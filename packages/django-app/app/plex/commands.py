@@ -1,13 +1,15 @@
 import asyncio
 import logging
 
+import networkx as nx
 from aiohttp import ClientSession
+from asgiref.sync import sync_to_async
 from common.commands.abstract_base_command import AbstractBaseCommand
 from services.plex import Plex
 from services.tmdb import TMDB
 
 from plex.forms import EnrichMovieActorsForm
-from plex.repositories import PlexMovieRepository
+from plex.repositories import CachedGraphRepository, PlexMovieRepository
 
 logger = logging.getLogger(__name__)
 
@@ -26,13 +28,14 @@ class SyncWithPlexCommand(AbstractBaseCommand):
         super().execute()
 
         latest_movie = PlexMovieRepository.get_latest()
+        synced_count = 0
 
         for movie in Plex.fetch_movies(sort="addedAt:desc", container_start=0, container_size=5):
             added_at = Plex.normalize_added_at(movie.addedAt)
             if latest_movie and added_at <= latest_movie.created_at:
                 # break out of loop if we start to get a movie
                 # added before the latest movie in the database
-                return
+                break
 
             try:
                 movie_details = Plex.extract_movie_details(movie)
@@ -59,9 +62,21 @@ class SyncWithPlexCommand(AbstractBaseCommand):
                         plex_movie.save()
 
                 print(f"Created PlexMovie: {plex_movie}")
+                synced_count += 1
             except Exception as e:
                 logger.exception(f"Failed to create PlexMovie: {movie}")
                 logger.exception(e)
+
+        # Rebuild actor graph cache after syncing
+        if synced_count > 0:
+            logger.info(f"Synced {synced_count} movies, rebuilding actor graph cache...")
+            try:
+                command = BuildActorGraphCommand()
+                graph = asyncio.run(command.execute())
+                CachedGraphRepository.save_actor_graph(graph)
+                logger.info("Actor graph cache rebuilt successfully")
+            except Exception as e:
+                logger.exception(f"Failed to rebuild actor graph cache: {e}")
 
 
 class EnrichMovieActorsCommand(AbstractBaseCommand):
@@ -127,3 +142,81 @@ class EnrichMovieActorsCommand(AbstractBaseCommand):
             except Exception as e:
                 logger.exception(f"Error enriching actors for {movie.title}: {e}")
                 raise
+
+
+class BuildActorGraphCommand(AbstractBaseCommand):
+    """
+    Command to build a NetworkX graph of all movies and their associated people.
+    Includes actors, directors, producers, and writers.
+    """
+
+    async def execute(self) -> nx.Graph:
+        """
+        Build and return a NetworkX graph of movie-person relationships.
+
+        Returns:
+            nx.Graph: Complete graph of all movie-person relationships
+        """
+        super().execute()
+
+        logger.info("Building actor graph from database...")
+
+        movies = await sync_to_async(list)(PlexMovieRepository.model.objects.all().values())
+
+        graph = nx.Graph()
+        added_people = set()
+
+        for movie_dict in movies:
+            # Add movie node
+            year = movie_dict.get("year")
+            year = int(year) if year and year > 0 else None
+            year_string = f" ({year})" if year else ""
+            movie_title = f"{movie_dict['title']}{year_string}"
+            graph.add_node(movie_title, type="movie")
+
+            # Add all people (actors, directors, producers, writers)
+            for person_type in ["actors", "directors", "producers", "writers"]:
+                people = movie_dict.get(person_type) or []
+                for person in people:
+                    person_lower = person.lower()
+                    if person_lower not in added_people:
+                        graph.add_node(person_lower, type="person")
+                        added_people.add(person_lower)
+                    graph.add_edge(movie_title, person_lower)
+
+        logger.info(
+            f"Built graph with {graph.number_of_nodes()} nodes and {graph.number_of_edges()} edges"
+        )
+
+        return graph
+
+
+class GetActorGraphCommand(AbstractBaseCommand):
+    """
+    Command to get the actor graph, either from cache or by building it.
+    """
+
+    async def execute(self) -> nx.Graph:
+        """
+        Get the actor graph from cache, or build and cache it if not available.
+
+        Returns:
+            nx.Graph: Complete graph of all movie-person relationships
+        """
+        super().execute()
+
+        # Try to load from cache
+        graph = await CachedGraphRepository.load_actor_graph_async()
+
+        if graph is None:
+            logger.info("Actor graph not in cache, building...")
+            # Build graph if not cached
+            command = BuildActorGraphCommand()
+            graph = await command.execute()
+            # Cache it for next time
+            await sync_to_async(CachedGraphRepository.save_actor_graph)(graph)
+            logger.info("Actor graph cached successfully")
+        else:
+            logger.info("Loaded actor graph from cache")
+
+        return graph

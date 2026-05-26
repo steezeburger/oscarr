@@ -1,9 +1,11 @@
+import pickle
+
 from asgiref.sync import sync_to_async
 from common.repositories.base_repository import BaseRepository
 from django.db.models import Q
 from django.utils import timezone
 
-from plex.models import PlexMovie
+from plex.models import CachedGraph, PlexMovie
 
 
 class PlexMovieRepository(BaseRepository):
@@ -147,3 +149,54 @@ class PlexMovieRepository(BaseRepository):
 
         await sync_to_async(movie.save)()
         return movie
+
+
+class CachedGraphRepository(BaseRepository):
+    """
+    Repository for managing cached NetworkX graphs.
+    Generic repository that can cache any type of graph (actors, producers, directors, etc.).
+    """
+
+    model = CachedGraph
+
+    @classmethod
+    def save_actor_graph(cls, graph):
+        """
+        Save actor relationship graph to cache.
+
+        Args:
+            graph: NetworkX Graph object containing actor-movie relationships
+
+        Returns:
+            CachedGraph instance
+        """
+        graph_data = pickle.dumps(graph)
+        cached_graph, _ = cls.model.objects.update_or_create(  # type: ignore[attr-defined]
+            key="actor_graph", defaults={"data": graph_data}
+        )
+        return cached_graph
+
+    @classmethod
+    def load_actor_graph(cls):
+        """
+        Load actor relationship graph from cache.
+
+        Returns:
+            NetworkX Graph object if found, None otherwise
+        """
+        try:
+            cached = cls.model.objects.get(key="actor_graph")  # type: ignore[attr-defined]
+            return pickle.loads(cached.data)
+        except cls.model.DoesNotExist:  # type: ignore[attr-defined]
+            return None
+
+    @classmethod
+    @sync_to_async
+    def load_actor_graph_async(cls):
+        """
+        Async version of load_actor_graph.
+
+        Returns:
+            NetworkX Graph object if found, None otherwise
+        """
+        return cls.load_actor_graph()
