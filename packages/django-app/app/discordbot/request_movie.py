@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 @app_commands.command(name="request", description="Request a movie from the plex with a TMDB link.")
-async def request_movie(interaction: discord.Interaction, tmdb_id: str):
+async def request_movie(interaction: discord.Interaction["OscarrBot"], tmdb_id: str):
     await interaction.response.send_message("Working on it...")
 
     print("requesting movie via discord bot")
@@ -21,10 +21,7 @@ async def request_movie(interaction: discord.Interaction, tmdb_id: str):
     username = interaction.user.name
     print(f"username: {username}")
 
-    # Get the session from the bot client
-    bot = interaction.client
-    assert isinstance(bot, OscarrBot)
-    session = bot.web_client
+    session = interaction.client.web_client
 
     form = RequestMovieForm(
         {
@@ -114,13 +111,9 @@ def create_buttons(data) -> list[discord.ui.Button]:
 
 
 @app_commands.command(name="search_tmdb", description="Search TMDB for a movie.")
-async def search_tmdb(interaction: discord.Interaction, title: str):
+async def search_tmdb(interaction: discord.Interaction["OscarrBot"], title: str):
     print("searching tmdb via discord bot")
 
-    # Get the session from the bot client
-    from discordbot.bot import OscarrBot
-
-    assert isinstance(interaction.client, OscarrBot)
     session = interaction.client.web_client
     results = await TMDB.search_movies(title, session)
 
