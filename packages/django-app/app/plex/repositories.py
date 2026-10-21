@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from asgiref.sync import sync_to_async
 from common.repositories.base_repository import BaseRepository
 from django.db.models import Q
@@ -103,6 +105,44 @@ class PlexMovieRepository(BaseRepository):
             movies = movies[:limit]
 
         return movies
+
+    @classmethod
+    def get_movies_to_enrich(cls, limit=None, retry_after=timedelta(hours=24)):
+        """
+        Get active movies that haven't been enriched yet, skipping ones whose
+        last enrichment attempt was within `retry_after`.
+
+        Args:
+            limit: Maximum number of movies to return
+            retry_after: How long to wait before retrying a failed attempt
+
+        Returns:
+            QuerySet of PlexMovie instances ordered by created_at descending
+        """
+        cutoff = timezone.now() - retry_after
+        movies = cls.get_active_movies(without_enrichment=True).filter(
+            Q(enrichment_attempted_at__isnull=True) | Q(enrichment_attempted_at__lt=cutoff)
+        )
+
+        if limit:
+            movies = movies[:limit]
+
+        return movies
+
+    @classmethod
+    async def mark_enrichment_attempted_async(cls, movie):
+        """
+        Record that we tried to enrich this movie, whether or not it works.
+
+        Args:
+            movie: PlexMovie instance to update
+
+        Returns:
+            Updated PlexMovie instance
+        """
+        movie.enrichment_attempted_at = timezone.now()
+        await sync_to_async(movie.save)(update_fields=["enrichment_attempted_at"])
+        return movie
 
     @classmethod
     def update_movie_actors(cls, movie, actors, tmdb_id=None):

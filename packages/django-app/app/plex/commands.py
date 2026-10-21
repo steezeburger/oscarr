@@ -1,4 +1,3 @@
-import asyncio
 import logging
 
 from aiohttp import ClientSession
@@ -25,7 +24,6 @@ class SyncWithPlexCommand(AbstractBaseCommand):
         super().execute()
 
         latest_movie = PlexMovieRepository.get_latest()
-        forms_to_enrich: list[EnrichMovieActorsForm] = []
 
         for movie in Plex.fetch_movies(sort="addedAt:desc", container_start=0, container_size=5):
             added_at = Plex.normalize_added_at(movie.addedAt)
@@ -38,34 +36,8 @@ class SyncWithPlexCommand(AbstractBaseCommand):
                 plex_movie.created_at = added_at
                 plex_movie.save()
                 print(f"Created PlexMovie: {plex_movie}")
-
-                form = EnrichMovieActorsForm({"movie": plex_movie.id, "max_actors": 30})
-                if form.is_valid():
-                    forms_to_enrich.append(form)
-                else:
-                    logger.warning(f"Invalid form for enriching {plex_movie.title}: {form.errors}")
             except Exception:
                 logger.exception(f"Failed to create PlexMovie: {movie}")
-
-        if forms_to_enrich:
-            asyncio.run(_enrich_all(forms_to_enrich))
-
-
-async def _enrich_all(forms: list[EnrichMovieActorsForm]) -> None:
-    """
-    Run all enrichments inside one event loop with a shared HTTP session,
-    instead of one event loop + one ClientSession per movie.
-    """
-    async with ClientSession() as session:
-        results = await asyncio.gather(
-            *(EnrichMovieActorsCommand(form).execute(session=session) for form in forms),
-            return_exceptions=True,
-        )
-        for form, result in zip(forms, results, strict=True):
-            if isinstance(result, Exception):
-                movie = form.cleaned_data.get("movie")
-                title = getattr(movie, "title", "<unknown>")
-                logger.warning(f"Failed to enrich actors for {title}: {result}")
 
 
 class EnrichMovieActorsCommand(AbstractBaseCommand):
@@ -76,19 +48,23 @@ class EnrichMovieActorsCommand(AbstractBaseCommand):
     def __init__(self, form: EnrichMovieActorsForm):
         self.form = form
 
-    async def execute(self, session: ClientSession | None = None):
+    async def execute(self, session: ClientSession | None = None) -> bool:
+        """
+        Returns True if the movie was enriched, False if TMDB couldn't find it.
+        """
         super().execute()
 
         movie = self.form.cleaned_data["movie"]
         max_actors = self.form.cleaned_data["max_actors"]
 
+        await PlexMovieRepository.mark_enrichment_attempted_async(movie)
+
         if session is None:
             async with ClientSession() as new_session:
-                await self._do_enrich(movie, max_actors, new_session)
-        else:
-            await self._do_enrich(movie, max_actors, session)
+                return await self._do_enrich(movie, max_actors, new_session)
+        return await self._do_enrich(movie, max_actors, session)
 
-    async def _do_enrich(self, movie, max_actors: int, session: ClientSession) -> None:
+    async def _do_enrich(self, movie, max_actors: int, session: ClientSession) -> bool:
         plex_actors = list(movie.actors) if movie.actors else []
         tmdb_id = movie.tmdb_id
 
@@ -101,7 +77,7 @@ class EnrichMovieActorsCommand(AbstractBaseCommand):
             )
             if not tmdb_id:
                 logger.warning(f"Could not find TMDB ID for {movie.title}")
-                return
+                return False
 
         try:
             credits = await TMDB.get_movie_credits(tmdb_id, session)
@@ -124,6 +100,7 @@ class EnrichMovieActorsCommand(AbstractBaseCommand):
                 f"Enriched {movie.title}: {len(plex_actors)} Plex + "
                 f"{len(tmdb_actors)} TMDB = {len(enriched_actors)} total"
             )
+            return True
         except Exception as e:
             logger.exception(f"Error enriching actors for {movie.title}: {e}")
             raise
