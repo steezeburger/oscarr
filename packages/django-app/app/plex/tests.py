@@ -10,7 +10,7 @@ from django.utils import timezone
 from services.plex import Plex
 from services.tmdb import TMDB
 
-from plex.commands import SyncWithPlexCommand
+from plex.commands import EnrichActorsCommand, SyncWithPlexCommand
 from plex.repositories import PlexMovieRepository
 from plex.test_helpers import PlexMovieFactory
 
@@ -180,3 +180,20 @@ class TestEnrichActorsCommand(TransactionTestCase):
 
         self.assertEqual(set(), searched)
         self.assertIn("No movies to enrich!", out)
+
+    def test_command_should_count_failures_and_keep_going(self):
+        with (
+            patch.object(TMDB, "find_movie_id", new_callable=AsyncMock, return_value=123),
+            patch.object(
+                TMDB,
+                "get_movie_credits",
+                new_callable=AsyncMock,
+                side_effect=[Exception("TMDB is down"), {"cast": [{"name": "TMDB Actor"}]}],
+            ),
+        ):
+            PlexMovieFactory(title="Second Unenriched")
+            result = EnrichActorsCommand().execute()
+
+        self.assertEqual(2, result.total)
+        self.assertEqual(1, result.enriched)
+        self.assertEqual(1, result.failed)
