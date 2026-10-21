@@ -1,0 +1,9 @@
+# oscarr scheduled jobs.
+# Install (or update) on the server with: just install-crontab
+
+# nightly backups
+0 7 * * * cd /root/oscarr-stuff/oscarr/packages/django-app && just create-json-backup /mnt/volume_sfo3_01/oscarr/backups
+0 7 * * * cd /root/oscarr-stuff/oscarr/packages/django-app && just create-pgdump /mnt/volume_sfo3_01/oscarr/backups
+
+# sync with plex every 10 minutes
+*/10 * * * * cd /root/oscarr-stuff/oscarr/packages/django-app && just sync-with-plex
