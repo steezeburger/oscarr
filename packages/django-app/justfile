@@ -39,6 +39,7 @@ create-json-backup location=default_backups_location:
 # pulls latest code, builds web image, migrates db, restarts web and bot containers
 update-oscarr:
   git pull origin main
+  just install-crontab
   docker compose --profile bot build web bot
   ./bin/dcp-django-admin.sh migrate
   docker compose stop web
