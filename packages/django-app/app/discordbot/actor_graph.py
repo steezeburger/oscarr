@@ -21,7 +21,8 @@ ROLES = (ACTORS, DIRECTORS, PRODUCERS, WRITERS)
 
 MOVIE_FIELDS = ("title", "year", *ROLES)
 
-# (max modified_at, row count). count catches hard deletes, which don't bump modified_at
+# (max modified_at, row count) of active movies. count catches deletes, which don't bump
+# the max modified_at of the remaining rows
 GraphSignature = tuple[datetime | None, int]
 
 
@@ -95,12 +96,12 @@ def build_actor_graph(movies: Iterable[Mapping[str, Any]]) -> ActorGraph:
 
 def get_graph_signature() -> GraphSignature:
     close_old_connections()
-    result = PlexMovie.objects.aggregate(Max("modified_at"), Count("id"))
+    result = PlexMovie.objects.filter(is_active=True).aggregate(Max("modified_at"), Count("id"))
     return result["modified_at__max"], result["id__count"]
 
 
 def load_movies() -> list[dict[str, Any]]:
-    return list(PlexMovie.objects.values(*MOVIE_FIELDS))
+    return list(PlexMovie.objects.filter(is_active=True).values(*MOVIE_FIELDS))
 
 
 class ActorGraphCache:

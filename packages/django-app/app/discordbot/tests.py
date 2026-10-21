@@ -12,6 +12,7 @@ from discordbot.actor_graph import (
 )
 from discordbot.bacon import format_path
 from django.test import SimpleTestCase, TestCase
+from plex.models import PlexMovie
 from plex.test_helpers import PlexMovieFactory
 
 
@@ -178,6 +179,30 @@ class TestActorGraphCache(TestCase):
         async_to_sync(cache.refresh)()
 
         older.delete(force_delete=True)
+
+        self.assertTrue(async_to_sync(cache.refresh)())
+        assert cache.graph is not None
+        self.assertNotIn("b", cache.graph.graph)
+
+    def test_should_leave_out_soft_deleted_movies(self):
+        PlexMovieFactory(actors=["a"])
+        PlexMovieFactory(actors=["b"]).delete()
+        cache = ActorGraphCache()
+
+        async_to_sync(cache.refresh)()
+
+        assert cache.graph is not None
+        self.assertIn("a", cache.graph.graph)
+        self.assertNotIn("b", cache.graph.graph)
+
+    def test_should_rebuild_when_movies_are_soft_deleted_in_bulk(self):
+        PlexMovieFactory(actors=["a"])
+        older = PlexMovieFactory(actors=["b"])
+        PlexMovieFactory(actors=["c"])
+        cache = ActorGraphCache()
+        async_to_sync(cache.refresh)()
+
+        PlexMovie.objects.filter(pk=older.pk).delete()
 
         self.assertTrue(async_to_sync(cache.refresh)())
         assert cache.graph is not None
