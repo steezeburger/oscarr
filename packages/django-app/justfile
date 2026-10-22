@@ -16,9 +16,9 @@ install-crontab:
 sync-with-plex:
   ./bin/dcp-django-admin.sh sync_with_plex
 
-# calls enrich_actors django management command in the container
-enrich-actors:
-  ./bin/dcp-django-admin.sh enrich_actors
+# calls enrich_actors django management command in the container, passing args through (e.g. --limit 50)
+enrich-actors *args:
+  ./bin/dcp-django-admin.sh enrich_actors {{args}}
 
 # starts the discord bot in a container (auto-restarts unless stopped)
 start-discord-bot:
